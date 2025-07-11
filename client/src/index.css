@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+  
+  /* Custom colors for LabPBR app */
+  --surface: hsl(240, 8%, 11.8%);
+  --elevated: hsl(240, 6%, 17.6%);
+  --success: hsl(122, 39%, 49%);
+  --warning: hsl(38, 92%, 58%);
+  --error: hsl(4, 90%, 58%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(240, 6%, 17.6%);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(240, 3.7%, 15.9%);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(240, 5%, 26%);
+  }
+}
+
+@layer components {
+  .surface {
+    background-color: var(--surface);
+  }
+
+  .elevated {
+    background-color: var(--elevated);
+  }
+
+  .text-success {
+    color: var(--success);
+  }
+
+  .text-warning {
+    color: var(--warning);
+  }
+
+  .text-error {
+    color: var(--error);
+  }
+
+  .bg-success {
+    background-color: var(--success);
+  }
+
+  .bg-warning {
+    background-color: var(--warning);
+  }
+
+  .bg-error {
+    background-color: var(--error);
+  }
+
+  .bg-success\/20 {
+    background-color: hsl(122, 39%, 49%, 0.2);
+  }
+
+  .bg-warning\/20 {
+    background-color: hsl(38, 92%, 58%, 0.2);
+  }
+
+  .bg-error\/20 {
+    background-color: hsl(4, 90%, 58%, 0.2);
+  }
+
+  /* Custom slider styles */
+  .slider {
+    -webkit-appearance: none;
+    background: hsl(240, 3.7%, 15.9%);
+    outline: none;
+    border-radius: 4px;
+    height: 4px;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: hsl(207, 90%, 54%);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: hsl(207, 90%, 54%);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+}

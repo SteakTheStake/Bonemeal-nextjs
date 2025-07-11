@@ -1,0 +1,323 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import multer from "multer";
+import { z } from "zod";
+import { insertConversionJobSchema, type ConversionSettings, type ProcessingStatus } from "@shared/schema";
+import { TextureProcessor } from "./services/texture-processor";
+import { LabPBRConverter } from "./services/labpbr-converter";
+import { ZipHandler } from "./services/zip-handler";
+
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 200 * 1024 * 1024 } // 200MB limit
+});
+
+const textureProcessor = new TextureProcessor();
+const labpbrConverter = new LabPBRConverter();
+const zipHandler = new ZipHandler();
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Get all conversion jobs
+  app.get("/api/jobs", async (req, res) => {
+    try {
+      const jobs = await storage.getAllConversionJobs();
+      res.json(jobs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch conversion jobs" });
+    }
+  });
+
+  // Get specific conversion job
+  app.get("/api/jobs/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const job = await storage.getConversionJob(id);
+      if (!job) {
+        return res.status(404).json({ message: "Conversion job not found" });
+      }
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch conversion job" });
+    }
+  });
+
+  // Get processing status
+  app.get("/api/jobs/:id/status", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const status = await storage.getProcessingStatus(id);
+      if (!status) {
+        return res.status(404).json({ message: "Processing status not found" });
+      }
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch processing status" });
+    }
+  });
+
+  // Get texture files for a job
+  app.get("/api/jobs/:id/files", async (req, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      const files = await storage.getTextureFilesByJobId(jobId);
+      res.json(files);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch texture files" });
+    }
+  });
+
+  // Upload and process files
+  app.post("/api/upload", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const settingsSchema = z.object({
+        generateBaseColor: z.boolean().default(true),
+        generateRoughness: z.boolean().default(true),
+        generateNormal: z.boolean().default(true),
+        generateHeight: z.boolean().default(true),
+        generateAO: z.boolean().default(true),
+        baseColorContrast: z.number().min(0).max(2).default(1.2),
+        roughnessIntensity: z.number().min(0).max(1).default(0.8),
+        roughnessInvert: z.boolean().default(false),
+        normalStrength: z.number().min(0).max(3).default(1.0),
+        heightDepth: z.number().min(0).max(1).default(0.25),
+        aoRadius: z.number().min(0).max(1).default(0.5),
+        inputType: z.enum(['single', 'sequence', 'resourcepack']).default('single'),
+      });
+
+      const settings = settingsSchema.parse(JSON.parse(req.body.settings || '{}'));
+
+      // Create conversion job
+      const job = await storage.createConversionJob({
+        filename: req.file.originalname,
+        status: 'pending',
+        settings,
+      });
+
+      // Initialize processing status
+      const initialStatus: ProcessingStatus = {
+        currentTask: 'Initializing...',
+        progress: 0,
+        totalSteps: 5,
+        currentStep: 0,
+        imagesProcessed: 0,
+        totalImages: 0,
+        texturesGenerated: 0,
+        elapsedTime: 0,
+        logs: [{
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: 'Processing started'
+        }]
+      };
+
+      await storage.updateProcessingStatus(job.id, initialStatus);
+
+      // Start processing asynchronously
+      processFileAsync(job.id, req.file.buffer, settings);
+
+      res.json({ jobId: job.id });
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).json({ message: "Failed to process upload" });
+    }
+  });
+
+  // Download converted resource pack
+  app.get("/api/jobs/:id/download", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const job = await storage.getConversionJob(id);
+      
+      if (!job) {
+        return res.status(404).json({ message: "Conversion job not found" });
+      }
+
+      if (job.status !== 'completed') {
+        return res.status(400).json({ message: "Conversion not completed" });
+      }
+
+      // Generate download zip
+      const zipBuffer = await zipHandler.createConvertedResourcePack(id);
+      
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${job.filename.replace('.zip', '')}_labpbr.zip"`);
+      res.send(zipBuffer);
+    } catch (error) {
+      console.error('Download error:', error);
+      res.status(500).json({ message: "Failed to generate download" });
+    }
+  });
+
+  // Validate textures
+  app.post("/api/validate", upload.single("file"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const validation = await labpbrConverter.validateTexture(req.file.buffer);
+      res.json(validation);
+    } catch (error) {
+      console.error('Validation error:', error);
+      res.status(500).json({ message: "Failed to validate texture" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
+
+async function processFileAsync(jobId: number, fileBuffer: Buffer, settings: ConversionSettings) {
+  const startTime = Date.now();
+  
+  try {
+    await storage.updateConversionJob(jobId, { status: 'processing' });
+
+    // Update status
+    const updateStatus = async (update: Partial<ProcessingStatus>) => {
+      const currentStatus = await storage.getProcessingStatus(jobId);
+      if (currentStatus) {
+        const newStatus = { 
+          ...currentStatus, 
+          ...update,
+          elapsedTime: Date.now() - startTime
+        };
+        await storage.updateProcessingStatus(jobId, newStatus);
+      }
+    };
+
+    // Determine file type and process accordingly
+    const job = await storage.getConversionJob(jobId);
+    if (!job) return;
+
+    if (job.filename.endsWith('.zip')) {
+      // Process resource pack
+      await updateStatus({ 
+        currentTask: 'Extracting resource pack...',
+        currentStep: 1,
+        logs: [{ timestamp: new Date().toISOString(), level: 'info', message: 'Extracting resource pack...' }]
+      });
+
+      const extractedFiles = await zipHandler.extractResourcePack(fileBuffer);
+      
+      await updateStatus({
+        currentTask: 'Processing textures...',
+        currentStep: 2,
+        totalImages: extractedFiles.length,
+        logs: [{ timestamp: new Date().toISOString(), level: 'success', message: `Found ${extractedFiles.length} texture files` }]
+      });
+
+      // Process each texture file
+      for (let i = 0; i < extractedFiles.length; i++) {
+        const file = extractedFiles[i];
+        
+        await updateStatus({
+          currentTask: `Processing ${file.name}...`,
+          imagesProcessed: i,
+          logs: [{ timestamp: new Date().toISOString(), level: 'info', message: `Processing ${file.name}...` }]
+        });
+
+        // Create texture file record
+        const textureFile = await storage.createTextureFile({
+          jobId,
+          originalPath: file.path,
+          textureType: 'base',
+          validationStatus: 'valid',
+        });
+
+        // Process texture
+        const processedTextures = await textureProcessor.processImage(file.buffer, settings);
+        
+        // Validate against LabPBR
+        const validation = await labpbrConverter.validateTexture(processedTextures.specular);
+        
+        await storage.updateTextureFile(textureFile.id, {
+          validationStatus: validation.issues.some(i => i.level === 'error') ? 'error' : 
+                           validation.issues.some(i => i.level === 'warning') ? 'warning' : 'valid',
+          validationIssues: validation.issues,
+        });
+
+        await updateStatus({
+          texturesGenerated: (i + 1) * 4, // 4 textures per input
+        });
+      }
+
+      await updateStatus({
+        currentTask: 'Creating output package...',
+        currentStep: 4,
+        progress: 90,
+        logs: [{ timestamp: new Date().toISOString(), level: 'info', message: 'Creating output package...' }]
+      });
+
+      // Create output zip
+      await zipHandler.createConvertedResourcePack(jobId);
+
+    } else {
+      // Process single image
+      await updateStatus({
+        currentTask: 'Processing single image...',
+        currentStep: 1,
+        totalImages: 1,
+        logs: [{ timestamp: new Date().toISOString(), level: 'info', message: 'Processing single image...' }]
+      });
+
+      const processedTextures = await textureProcessor.processImage(fileBuffer, settings);
+      
+      await updateStatus({
+        currentTask: 'Validating textures...',
+        currentStep: 3,
+        texturesGenerated: 4,
+        logs: [{ timestamp: new Date().toISOString(), level: 'success', message: 'Generated 4 texture maps' }]
+      });
+
+      // Validate
+      const validation = await labpbrConverter.validateTexture(processedTextures.specular);
+      
+      await storage.createTextureFile({
+        jobId,
+        originalPath: job.filename,
+        textureType: 'base',
+        validationStatus: validation.issues.some(i => i.level === 'error') ? 'error' : 
+                         validation.issues.some(i => i.level === 'warning') ? 'warning' : 'valid',
+      });
+    }
+
+    await updateStatus({
+      currentTask: 'Complete!',
+      currentStep: 5,
+      progress: 100,
+      logs: [{ timestamp: new Date().toISOString(), level: 'success', message: 'Processing completed successfully' }]
+    });
+
+    await storage.updateConversionJob(jobId, { 
+      status: 'completed', 
+      progress: 100,
+      completedAt: new Date()
+    });
+
+  } catch (error) {
+    console.error('Processing error:', error);
+    
+    await storage.updateConversionJob(jobId, { 
+      status: 'failed',
+      errors: [{ message: error instanceof Error ? error.message : 'Unknown error' }]
+    });
+
+    const currentStatus = await storage.getProcessingStatus(jobId);
+    if (currentStatus) {
+      await storage.updateProcessingStatus(jobId, {
+        ...currentStatus,
+        logs: [...currentStatus.logs, { 
+          timestamp: new Date().toISOString(), 
+          level: 'error', 
+          message: `Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        }]
+      });
+    }
+  }
+}
