@@ -190,19 +190,43 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
               {uploadMutation.isPending ? "Growing with Bonemeal..." : "Browse Files"}
             </Button>
             
-            {/* Visible file input for testing */}
-            <input
-              type="file"
-              accept=".png,.jpg,.jpeg,.tiff,.tga,.zip"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  console.log('Direct file input selected:', file.name);
-                  handleFileUpload(file);
-                }
-              }}
-              className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
-            />
+            {/* Direct file input for ZIP uploads */}
+            <div className="mt-3 p-3 border border-dashed border-border rounded-lg">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                📁 Upload ZIP Resource Pack
+              </label>
+              <input
+                type="file"
+                accept=".zip"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    console.log('ZIP file selected:', file.name);
+                    handleFileUpload(file);
+                  }
+                }}
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+              />
+            </div>
+            
+            {/* Direct file input for individual textures */}
+            <div className="mt-3 p-3 border border-dashed border-border rounded-lg">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                🖼️ Upload Individual Texture
+              </label>
+              <input
+                type="file"
+                accept=".png,.jpg,.jpeg,.tiff,.tga"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    console.log('Texture file selected:', file.name);
+                    handleFileUpload(file);
+                  }
+                }}
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+              />
+            </div>
             
             <div className="text-xs text-muted-foreground">
               or drag a resource pack ZIP file (max 200MB)

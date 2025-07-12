@@ -32,6 +32,14 @@ export class MemStorage implements IStorage {
     this.currentFileId = 1;
   }
 
+  clearAllJobs() {
+    this.conversionJobs.clear();
+    this.textureFiles.clear();
+    this.processingStatus.clear();
+    this.currentJobId = 1;
+    this.currentFileId = 1;
+  }
+
   async createConversionJob(insertJob: InsertConversionJob): Promise<ConversionJob> {
     const id = this.currentJobId++;
     const job: ConversionJob = {
