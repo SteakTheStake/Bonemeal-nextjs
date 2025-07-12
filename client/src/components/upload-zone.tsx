@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CloudUpload, FolderOpen } from "lucide-react";
+import { CloudUpload, FolderOpen, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,6 +13,41 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const validateMutation = useMutation({
+    mutationFn: async (file: File) => {
+      console.log('Validating file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      
+      const formData = new FormData();
+      formData.append("file", file);
+
+      console.log('Sending request to /api/validate');
+      const response = await apiRequest("POST", "/api/validate", formData);
+      console.log('Validation response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Validation error response:', errorText);
+        throw new Error(`Validation failed: ${response.status} ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Validation complete",
+        description: `Found ${data.issues?.length || 0} issues. Check the validation panel for details.`,
+      });
+      console.log('Validation result:', data);
+    },
+    onError: (error) => {
+      toast({
+        title: "Validation failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -98,49 +133,59 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
     }
   }, []);
 
-  const handleFileUpload = (file: File) => {
-    console.log('handleFileUpload called with file:', file.name, 'size:', file.size, 'type:', file.type);
-    
+  const validateFile = (file: File) => {
     // Validate file type
     const validExtensions = ['.png', '.jpg', '.jpeg', '.tiff', '.tga', '.zip'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     
-    console.log('File extension:', fileExtension);
-    
     if (!validExtensions.includes(fileExtension)) {
-      console.log('Invalid file type:', fileExtension);
       toast({
         title: "Invalid file type",
         description: "Please upload a PNG, JPG, TIFF, TGA, or ZIP file.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     // Check file size (200MB limit)
     if (file.size > 200 * 1024 * 1024) {
-      console.log('File too large:', file.size);
       toast({
         title: "File too large",
         description: "Maximum file size is 200MB.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     // Check if file is empty
     if (file.size === 0) {
-      console.log('File is empty');
       toast({
         title: "Empty file",
         description: "Please select a valid file.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  const handleFileUpload = (file: File) => {
+    console.log('handleFileUpload called with file:', file.name, 'size:', file.size, 'type:', file.type);
+    
+    if (!validateFile(file)) return;
 
     console.log('File validation passed, starting upload...');
     uploadMutation.mutate(file);
+  };
+
+  const handleFileValidation = (file: File) => {
+    console.log('handleFileValidation called with file:', file.name, 'size:', file.size, 'type:', file.type);
+    
+    if (!validateFile(file)) return;
+
+    console.log('File validation passed, starting validation...');
+    validateMutation.mutate(file);
   };
 
   const handleBrowseFiles = () => {
@@ -156,6 +201,24 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
         handleFileUpload(file);
       } else {
         console.log('No file selected');
+      }
+    };
+    input.click();
+  };
+
+  const handleBrowseForValidation = () => {
+    console.log('Browse for validation button clicked');
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".png,.jpg,.jpeg,.tiff,.tga,.zip";
+    input.onchange = (e) => {
+      console.log('File input changed for validation');
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        console.log('File selected for validation:', file.name);
+        handleFileValidation(file);
+      } else {
+        console.log('No file selected for validation');
       }
     };
     input.click();
@@ -181,32 +244,67 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
             🌱 Let Bonemeal grow your texture productivity
           </p>
           <div className="space-y-2">
-            <Button 
-              onClick={handleBrowseFiles}
-              disabled={uploadMutation.isPending}
-              className="grow-button moss-texture"
-            >
-              <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
-              {uploadMutation.isPending ? "Growing with Bonemeal..." : "Browse Files"}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleBrowseFiles}
+                disabled={uploadMutation.isPending}
+                className="grow-button moss-texture flex-1"
+              >
+                <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
+                {uploadMutation.isPending ? "Growing with Bonemeal..." : "Browse Files"}
+              </Button>
+              <Button 
+                onClick={handleBrowseForValidation}
+                disabled={validateMutation.isPending}
+                variant="outline"
+                className="grow-button moss-texture flex-1"
+              >
+                <CheckCircle className="h-4 w-4 mr-2 branch-sway" />
+                {validateMutation.isPending ? "Validating..." : "Validate Only"}
+              </Button>
+            </div>
             
             {/* Direct file input for ZIP uploads */}
             <div className="mt-3 p-3 border border-dashed border-border rounded-lg">
               <label className="block text-sm font-medium text-foreground mb-2">
                 📁 Upload ZIP Resource Pack
               </label>
-              <input
-                type="file"
-                accept=".zip"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    console.log('ZIP file selected:', file.name);
-                    handleFileUpload(file);
-                  }
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="file"
+                  accept=".zip"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      console.log('ZIP file selected for upload:', file.name);
+                      handleFileUpload(file);
+                    }
+                  }}
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                />
+              </div>
+              <Button 
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = ".zip";
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      console.log('ZIP file selected for validation:', file.name);
+                      handleFileValidation(file);
+                    }
+                  };
+                  input.click();
                 }}
-                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
-              />
+                disabled={validateMutation.isPending}
+                variant="outline"
+                size="sm"
+                className="w-full grow-button moss-texture"
+              >
+                <CheckCircle className="h-3 w-3 mr-2" />
+                {validateMutation.isPending ? "Validating ZIP..." : "Validate ZIP Only"}
+              </Button>
             </div>
             
             {/* Direct file input for individual textures */}
@@ -214,18 +312,42 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
               <label className="block text-sm font-medium text-foreground mb-2">
                 🖼️ Upload Individual Texture
               </label>
-              <input
-                type="file"
-                accept=".png,.jpg,.jpeg,.tiff,.tga"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    console.log('Texture file selected:', file.name);
-                    handleFileUpload(file);
-                  }
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.tiff,.tga"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      console.log('Texture file selected for upload:', file.name);
+                      handleFileUpload(file);
+                    }
+                  }}
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                />
+              </div>
+              <Button 
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = ".png,.jpg,.jpeg,.tiff,.tga";
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      console.log('Texture file selected for validation:', file.name);
+                      handleFileValidation(file);
+                    }
+                  };
+                  input.click();
                 }}
-                className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
-              />
+                disabled={validateMutation.isPending}
+                variant="outline"
+                size="sm"
+                className="w-full grow-button moss-texture"
+              >
+                <CheckCircle className="h-3 w-3 mr-2" />
+                {validateMutation.isPending ? "Validating Texture..." : "Validate Texture Only"}
+              </Button>
             </div>
             
             <div className="text-xs text-muted-foreground">

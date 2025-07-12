@@ -189,8 +189,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const validation = await labpbrConverter.validateTexture(req.file.buffer);
-      res.json(validation);
+      console.log('Validating file:', req.file.originalname, 'size:', req.file.size);
+
+      // Check if it's a ZIP file (resource pack)
+      if (req.file.originalname.toLowerCase().endsWith('.zip')) {
+        console.log('Validating ZIP resource pack');
+        
+        // Extract files from ZIP
+        const extractedFiles = await zipHandler.extractResourcePack(req.file.buffer);
+        console.log('Extracted files:', extractedFiles.length);
+        
+        const validationResults = {
+          isValid: true,
+          issues: [],
+          version: "1.0.0",
+          totalFiles: extractedFiles.length,
+          textureFiles: extractedFiles.filter(f => f.isTexture).length,
+          fileDetails: []
+        };
+
+        // Validate each texture file
+        for (const file of extractedFiles) {
+          if (file.isTexture) {
+            try {
+              const validation = await labpbrConverter.validateTexture(file.buffer);
+              validationResults.fileDetails.push({
+                filename: file.name,
+                path: file.path,
+                validation: validation,
+                size: file.buffer.length
+              });
+              
+              // Collect all issues
+              if (validation.issues) {
+                validationResults.issues.push(...validation.issues.map(issue => ({
+                  ...issue,
+                  filename: file.name,
+                  path: file.path
+                })));
+              }
+              
+              if (!validation.isValid) {
+                validationResults.isValid = false;
+              }
+            } catch (error) {
+              console.error('Error validating texture:', file.name, error);
+              validationResults.issues.push({
+                level: 'error',
+                message: `Failed to validate texture: ${error.message}`,
+                filename: file.name,
+                path: file.path
+              });
+              validationResults.isValid = false;
+            }
+          }
+        }
+
+        res.json(validationResults);
+      } else {
+        // Single texture file validation
+        console.log('Validating single texture file');
+        const validation = await labpbrConverter.validateTexture(req.file.buffer);
+        res.json({
+          ...validation,
+          totalFiles: 1,
+          textureFiles: 1,
+          fileDetails: [{
+            filename: req.file.originalname,
+            path: req.file.originalname,
+            validation: validation,
+            size: req.file.size
+          }]
+        });
+      }
     } catch (error) {
       console.error('Validation error:', error);
       res.status(500).json({ message: "Failed to validate texture" });
