@@ -3,36 +3,39 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(280, 15%, 8%);
-  --foreground: hsl(0, 0%, 95%);
-  --muted: hsl(285, 20%, 16%);
-  --muted-foreground: hsl(280, 12%, 65%);
-  --popover: hsl(285, 20%, 12%);
-  --popover-foreground: hsl(0, 0%, 95%);
-  --card: hsl(285, 20%, 12%);
-  --card-foreground: hsl(0, 0%, 95%);
-  --border: hsl(285, 20%, 20%);
-  --input: hsl(285, 20%, 16%);
-  --primary: hsl(120, 35%, 65%);
-  --primary-foreground: hsl(285, 30%, 15%);
-  --secondary: hsl(285, 25%, 18%);
-  --secondary-foreground: hsl(120, 25%, 88%);
-  --accent: hsl(270, 40%, 55%);
-  --accent-foreground: hsl(120, 25%, 92%);
-  --destructive: hsl(0, 50%, 45%);
-  --destructive-foreground: hsl(0, 0%, 95%);
-  --ring: hsl(120, 35%, 65%);
+  --background: hsl(50, 20%, 92%);
+  --foreground: hsl(280, 15%, 20%);
+  --muted: hsl(45, 15%, 85%);
+  --muted-foreground: hsl(280, 12%, 45%);
+  --popover: hsl(48, 25%, 95%);
+  --popover-foreground: hsl(280, 15%, 20%);
+  --card: hsl(48, 25%, 95%);
+  --card-foreground: hsl(280, 15%, 20%);
+  --border: hsl(45, 20%, 75%);
+  --input: hsl(45, 15%, 90%);
+  --primary: hsl(120, 40%, 45%);
+  --primary-foreground: hsl(48, 25%, 95%);
+  --secondary: hsl(45, 15%, 80%);
+  --secondary-foreground: hsl(280, 15%, 25%);
+  --accent: hsl(270, 30%, 65%);
+  --accent-foreground: hsl(48, 25%, 95%);
+  --destructive: hsl(0, 45%, 55%);
+  --destructive-foreground: hsl(48, 25%, 95%);
+  --ring: hsl(120, 40%, 45%);
   --radius: 0.5rem;
   
-  /* Custom organic colors for Bonemeal */
-  --surface: hsl(285, 18%, 14%);
-  --elevated: hsl(285, 22%, 18%);
-  --success: hsl(120, 45%, 55%);
-  --warning: hsl(45, 70%, 65%);
-  --error: hsl(0, 55%, 50%);
-  --growth: hsl(120, 50%, 70%);
-  --earth: hsl(30, 35%, 40%);
-  --bloom: hsl(270, 60%, 75%);
+  /* Custom organic colors for Bonemeal - bright chalky tones */
+  --surface: hsl(48, 20%, 88%);
+  --elevated: hsl(48, 25%, 92%);
+  --success: hsl(120, 45%, 50%);
+  --warning: hsl(45, 70%, 55%);
+  --error: hsl(0, 55%, 55%);
+  --growth: hsl(120, 50%, 55%);
+  --earth: hsl(30, 35%, 70%);
+  --bloom: hsl(270, 40%, 75%);
+  --moss: hsl(85, 25%, 75%);
+  --vine: hsl(95, 30%, 65%);
+  --chalk: hsl(50, 25%, 95%);
 }
 
 @layer base {
@@ -152,9 +155,9 @@
   }
 
   @keyframes pulse-glow {
-    0% { box-shadow: 0 0 5px hsl(120, 35%, 65%, 0.3); }
-    50% { box-shadow: 0 0 20px hsl(120, 35%, 65%, 0.6); }
-    100% { box-shadow: 0 0 5px hsl(120, 35%, 65%, 0.3); }
+    0% { box-shadow: 0 0 8px hsl(120, 40%, 45%, 0.2); }
+    50% { box-shadow: 0 0 25px hsl(120, 40%, 45%, 0.4); }
+    100% { box-shadow: 0 0 8px hsl(120, 40%, 45%, 0.2); }
   }
 
   @keyframes float {
@@ -177,17 +180,22 @@
       hsl(120, 35%, 65%) 100%);
   }
 
-  /* Organic background patterns */
+  /* Organic background patterns - bright chalky glassmorphism */
   .organic-bg {
-    background: radial-gradient(circle at 20% 80%, hsl(285, 20%, 12%, 0.8) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, hsl(270, 40%, 55%, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, hsl(120, 35%, 65%, 0.1) 0%, transparent 50%);
+    background: 
+      radial-gradient(circle at 20% 80%, hsl(85, 25%, 75%, 0.15) 0%, transparent 60%),
+      radial-gradient(circle at 80% 20%, hsl(270, 40%, 75%, 0.1) 0%, transparent 60%),
+      radial-gradient(circle at 40% 40%, hsl(120, 50%, 55%, 0.08) 0%, transparent 60%),
+      linear-gradient(135deg, hsl(50, 25%, 95%) 0%, hsl(48, 20%, 88%) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(45, 20%, 75%, 0.3);
   }
 
-  /* Living borders that pulse */
+  /* Living borders that pulse - bright chalky */
   .living-border {
-    border: 1px solid hsl(120, 35%, 65%, 0.3);
+    border: 1px solid hsl(120, 40%, 45%, 0.4);
     animation: pulse-glow 3s ease-in-out infinite;
+    box-shadow: 0 0 10px hsl(120, 40%, 45%, 0.1);
   }
 
   /* Floating elements */
@@ -200,21 +208,49 @@
     animation: branch-sway 6s ease-in-out infinite;
   }
 
-  /* Moss-like texture for cards */
+  /* Moss-like texture for cards - bright chalky glassmorphism */
   .moss-card {
-    background: linear-gradient(135deg, 
-      hsl(285, 20%, 12%) 0%, 
-      hsl(285, 25%, 14%) 30%, 
-      hsl(120, 20%, 10%) 70%, 
-      hsl(285, 20%, 12%) 100%);
+    background: 
+      linear-gradient(135deg, 
+        hsl(48, 25%, 95%) 0%, 
+        hsl(85, 25%, 75%, 0.3) 30%, 
+        hsl(95, 30%, 65%, 0.2) 70%, 
+        hsl(50, 25%, 95%) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid hsl(45, 20%, 75%, 0.5);
+    box-shadow: 0 4px 20px hsl(120, 40%, 45%, 0.1);
   }
 
   /* Growing progress bars */
   .progress-grow {
     background: linear-gradient(90deg, 
-      hsl(120, 50%, 70%) 0%, 
-      hsl(120, 45%, 55%) 50%, 
-      hsl(120, 60%, 75%) 100%);
+      hsl(120, 50%, 55%) 0%, 
+      hsl(120, 45%, 50%) 50%, 
+      hsl(120, 60%, 60%) 100%);
     animation: grow 2s ease-in-out infinite;
+  }
+
+  /* Glassmorphism effect for main elements */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  /* Subtle vine texture overlay */
+  .vine-texture {
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(95, 30%, 65%, 0.1) 2px, transparent 2px),
+      radial-gradient(circle at 75% 75%, hsl(85, 25%, 75%, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px, 20px 20px;
+  }
+
+  /* Moss texture for buttons */
+  .moss-texture {
+    background-image: 
+      radial-gradient(circle at 50% 50%, hsl(85, 25%, 75%, 0.2) 1px, transparent 1px),
+      radial-gradient(circle at 25% 75%, hsl(95, 30%, 65%, 0.15) 1px, transparent 1px);
+    background-size: 15px 15px, 10px 10px;
   }
 }

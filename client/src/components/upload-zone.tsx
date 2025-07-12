@@ -130,7 +130,7 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
   return (
     <div className="flex-1 p-6">
       <div 
-        className={`h-full border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors organic-bg ${
+        className={`h-full border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors glass-card vine-texture ${
           isDragging ? "living-border bg-primary/10" : "border-border hover:living-border"
         }`}
         onDragOver={handleDragOver}
@@ -150,7 +150,7 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
             <Button 
               onClick={handleBrowseFiles}
               disabled={uploadMutation.isPending}
-              className="grow-button"
+              className="grow-button moss-texture"
             >
               <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
               {uploadMutation.isPending ? "Growing with Bonemeal..." : "Browse Files"}

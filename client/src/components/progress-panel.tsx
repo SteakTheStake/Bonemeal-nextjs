@@ -37,7 +37,7 @@ export function ProgressPanel({ job, processingStatus }: ProgressPanelProps) {
   };
 
   return (
-    <div className="p-4 flex flex-col h-full organic-bg">
+    <div className="p-4 flex flex-col h-full glass-card vine-texture">
       <h3 className="text-sm font-medium mb-3 text-primary">🌿 Growth Progress</h3>
       
       {/* Current Task */}

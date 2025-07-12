@@ -47,9 +47,9 @@ export default function Converter() {
   }, [jobs, activeJob]);
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground organic-bg">
+    <div className="h-screen flex flex-col bg-background text-foreground organic-bg vine-texture">
       {/* Top Menu Bar */}
-      <header className="moss-card border-b living-border px-4 py-2 flex items-center justify-between">
+      <header className="glass-card moss-texture border-b living-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <img 
@@ -81,16 +81,16 @@ export default function Converter() {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="w-80 moss-card border-r living-border flex flex-col">
+        <aside className="w-80 glass-card moss-texture border-r living-border flex flex-col">
           {/* Project Panel */}
           <div className="p-4 border-b living-border">
             <h2 className="text-sm font-medium text-muted-foreground mb-3">🌱 Project</h2>
             <div className="space-y-2">
-              <Button className="w-full grow-button" size="sm">
+              <Button className="w-full grow-button moss-texture" size="sm">
                 <Plus className="h-4 w-4 mr-2 branch-sway" />
                 New Project
               </Button>
-              <Button variant="secondary" className="w-full grow-button" size="sm">
+              <Button variant="secondary" className="w-full grow-button moss-texture" size="sm">
                 <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
                 Open Project
               </Button>
@@ -100,7 +100,7 @@ export default function Converter() {
           {/* Settings Tabs */}
           <div className="flex-1 overflow-y-auto">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 m-4 moss-card">
+              <TabsList className="grid w-full grid-cols-2 m-4 glass-card moss-texture">
                 <TabsTrigger value="basic" className="text-xs grow-button">🌿 Basic</TabsTrigger>
                 <TabsTrigger value="advanced" className="text-xs grow-button">🔬 Advanced</TabsTrigger>
               </TabsList>
@@ -133,9 +133,9 @@ export default function Converter() {
         </main>
 
         {/* Right Panel */}
-        <aside className="w-80 moss-card border-l living-border flex flex-col">
+        <aside className="w-80 glass-card moss-texture border-l living-border flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 moss-card">
+            <TabsList className="grid w-full grid-cols-3 glass-card moss-texture">
               <TabsTrigger value="progress" className="grow-button">🌿 Progress</TabsTrigger>
               <TabsTrigger value="validation" className="grow-button">✨ Validation</TabsTrigger>
               <TabsTrigger value="batch" className="grow-button">🎯 Batch</TabsTrigger>
