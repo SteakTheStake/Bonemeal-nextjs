@@ -70,8 +70,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Upload and process files
   app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
+      console.log('Upload request received');
+      console.log('File:', req.file ? {
+        originalname: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        bufferSize: req.file.buffer?.length || 0
+      } : 'No file');
+      console.log('Settings:', req.body.settings || 'No settings');
+      
       if (!req.file) {
+        console.log('No file uploaded');
         return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      if (!req.file.buffer || req.file.buffer.length === 0) {
+        console.log('Empty file buffer');
+        return res.status(400).json({ message: "Empty file uploaded" });
       }
 
       const settingsSchema = z.object({

@@ -16,6 +16,8 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      
       const formData = new FormData();
       formData.append("file", file);
       formData.append("settings", JSON.stringify({
@@ -47,7 +49,16 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
         }
       }));
 
+      console.log('Sending request to /api/upload');
       const response = await apiRequest("POST", "/api/upload", formData);
+      console.log('Upload response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Upload error response:', errorText);
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+      
       return response.json();
     },
     onSuccess: (data) => {
@@ -88,11 +99,16 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
   }, []);
 
   const handleFileUpload = (file: File) => {
+    console.log('handleFileUpload called with file:', file.name, 'size:', file.size, 'type:', file.type);
+    
     // Validate file type
     const validExtensions = ['.png', '.jpg', '.jpeg', '.tiff', '.tga', '.zip'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     
+    console.log('File extension:', fileExtension);
+    
     if (!validExtensions.includes(fileExtension)) {
+      console.log('Invalid file type:', fileExtension);
       toast({
         title: "Invalid file type",
         description: "Please upload a PNG, JPG, TIFF, TGA, or ZIP file.",
@@ -103,6 +119,7 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
 
     // Check file size (200MB limit)
     if (file.size > 200 * 1024 * 1024) {
+      console.log('File too large:', file.size);
       toast({
         title: "File too large",
         description: "Maximum file size is 200MB.",
@@ -111,17 +128,34 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
       return;
     }
 
+    // Check if file is empty
+    if (file.size === 0) {
+      console.log('File is empty');
+      toast({
+        title: "Empty file",
+        description: "Please select a valid file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('File validation passed, starting upload...');
     uploadMutation.mutate(file);
   };
 
   const handleBrowseFiles = () => {
+    console.log('Browse files button clicked');
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".png,.jpg,.jpeg,.tiff,.tga,.zip";
     input.onchange = (e) => {
+      console.log('File input changed');
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
+        console.log('File selected:', file.name);
         handleFileUpload(file);
+      } else {
+        console.log('No file selected');
       }
     };
     input.click();
@@ -155,6 +189,21 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
               <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
               {uploadMutation.isPending ? "Growing with Bonemeal..." : "Browse Files"}
             </Button>
+            
+            {/* Visible file input for testing */}
+            <input
+              type="file"
+              accept=".png,.jpg,.jpeg,.tiff,.tga,.zip"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  console.log('Direct file input selected:', file.name);
+                  handleFileUpload(file);
+                }
+              }}
+              className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+            />
+            
             <div className="text-xs text-muted-foreground">
               or drag a resource pack ZIP file (max 200MB)
             </div>
