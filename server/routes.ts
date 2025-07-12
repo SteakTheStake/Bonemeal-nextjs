@@ -87,6 +87,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         heightDepth: z.number().min(0).max(1).default(0.25),
         aoRadius: z.number().min(0).max(1).default(0.5),
         inputType: z.enum(['single', 'sequence', 'resourcepack']).default('single'),
+        advancedProcessing: z.object({
+          enableBulkResize: z.boolean().default(false),
+          baseColorResolution: z.number().default(256),
+          specularResolution: z.number().default(256),
+          normalResolution: z.number().default(256),
+          baseColorInterpolation: z.enum(['nearest', 'linear', 'cubic', 'lanczos']).default('cubic'),
+          specularInterpolation: z.enum(['nearest', 'linear', 'cubic', 'lanczos']).default('linear'),
+          normalInterpolation: z.enum(['nearest', 'linear', 'cubic', 'lanczos']).default('lanczos'),
+          enableCompression: z.boolean().default(false),
+          compressionQuality: z.number().min(30).max(100).default(85),
+          enableDithering: z.boolean().default(false),
+          enableCTMSplit: z.boolean().default(false),
+          ctmVariations: z.number().min(1).max(47).default(47),
+        }).default({}),
       });
 
       const settings = settingsSchema.parse(JSON.parse(req.body.settings || '{}'));

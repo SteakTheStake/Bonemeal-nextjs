@@ -95,5 +95,16 @@ The application is configured for development and production environments:
 - **Validation**: LabPBR specification compliance checking
 - **Dark Theme**: Custom dark mode optimized for texture work
 - **Mobile Responsive**: Adaptive UI for different screen sizes
+- **Advanced Processing**: Professional-grade texture processing tools
+  - **Bulk Resize**: Independent resolution control for base color, specular, and normal maps
+  - **Smart Interpolation**: Per-texture-type interpolation methods (nearest, linear, cubic, lanczos)
+  - **Compression**: File size optimization with light diffusion dithering
+  - **CTM Split**: OptiFine Connected Textures Mod format generation with up to 47 variations
+
+### Recent Changes
+- **2025-01-12**: Added advanced processing suite with bulk resize, compression, and CTM split capabilities
+- **2025-01-12**: Implemented professional three-panel UI with tabbed settings (Basic/Advanced)
+- **2025-01-12**: Added support for independent texture resolution control (16x to 2048x)
+- **2025-01-12**: Integrated smart interpolation algorithms for optimal texture quality at all resolutions
 
 The architecture prioritizes developer experience with TypeScript throughout, modern tooling, and clear separation of concerns while maintaining performance for image processing operations.

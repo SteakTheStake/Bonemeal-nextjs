@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
 import { TexturePreview } from "@/components/texture-preview";
 import { ConversionSettings } from "@/components/conversion-settings";
+import { AdvancedProcessing } from "@/components/advanced-processing";
 import { ProgressPanel } from "@/components/progress-panel";
 import { ValidationPanel } from "@/components/validation-panel";
 import { BatchPanel } from "@/components/batch-panel";
@@ -90,11 +91,26 @@ export default function Converter() {
             </div>
           </div>
 
-          {/* Conversion Settings */}
+          {/* Settings Tabs */}
           <div className="flex-1 overflow-y-auto">
-            <ConversionSettings 
-              onJobCreated={setActiveJob}
-            />
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 m-4">
+                <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
+                <TabsTrigger value="advanced" className="text-xs">Advanced</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="mt-0">
+                <ConversionSettings 
+                  onJobCreated={setActiveJob}
+                />
+              </TabsContent>
+              
+              <TabsContent value="advanced" className="mt-0">
+                <AdvancedProcessing 
+                  onJobCreated={setActiveJob}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </aside>
 

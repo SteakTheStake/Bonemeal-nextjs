@@ -30,7 +30,21 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
         normalStrength: 1.0,
         heightDepth: 0.25,
         aoRadius: 0.5,
-        inputType: file.name.endsWith('.zip') ? 'resourcepack' : 'single'
+        inputType: file.name.endsWith('.zip') ? 'resourcepack' : 'single',
+        advancedProcessing: {
+          enableBulkResize: false,
+          baseColorResolution: 256,
+          specularResolution: 256,
+          normalResolution: 256,
+          baseColorInterpolation: 'cubic',
+          specularInterpolation: 'linear',
+          normalInterpolation: 'lanczos',
+          enableCompression: false,
+          compressionQuality: 85,
+          enableDithering: false,
+          enableCTMSplit: false,
+          ctmVariations: 47
+        }
       }));
 
       const response = await apiRequest("POST", "/api/upload", formData);

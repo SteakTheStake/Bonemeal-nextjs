@@ -64,6 +64,21 @@ export interface ConversionSettings {
   heightDepth: number;
   aoRadius: number;
   inputType: 'single' | 'sequence' | 'resourcepack';
+  // Advanced processing options
+  advancedProcessing: {
+    enableBulkResize: boolean;
+    baseColorResolution: number;
+    specularResolution: number;
+    normalResolution: number;
+    baseColorInterpolation: 'nearest' | 'linear' | 'cubic' | 'lanczos';
+    specularInterpolation: 'nearest' | 'linear' | 'cubic' | 'lanczos';
+    normalInterpolation: 'nearest' | 'linear' | 'cubic' | 'lanczos';
+    enableCompression: boolean;
+    compressionQuality: number;
+    enableDithering: boolean;
+    enableCTMSplit: boolean;
+    ctmVariations: number;
+  };
 }
 
 export interface ProcessingStatus {
