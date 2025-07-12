@@ -9,6 +9,8 @@ Bonemeal is a full-stack web application that converts standard textures to LabP
 Preferred communication style: Simple, everyday language.
 App name: "Bonemeal" - emphasizing productivity growth through automation
 Branding: Minecraft enchanted bonemeal gif as logo, growth/productivity theme
+Theme: Organic, plant-like design with chalky earth tones of purple, white, and green
+Visual style: Living, growing elements with animations that make the app feel alive
 
 ## System Architecture
 
@@ -104,6 +106,9 @@ The application is configured for development and production environments:
   - **CTM Split**: OptiFine Connected Textures Mod format generation with up to 47 variations
 
 ### Recent Changes
+- **2025-01-12**: Transformed app theme to organic, plant-like design with chalky earth tones (purple, white, green)
+- **2025-01-12**: Added living animations including floating logo, growing buttons, swaying icons, and pulsing borders
+- **2025-01-12**: Implemented moss-like card backgrounds and organic gradient patterns
 - **2025-01-12**: Rebranded application to "Bonemeal" with Minecraft enchanted bonemeal gif logo
 - **2025-01-12**: Added advanced processing suite with bulk resize, compression, and CTM split capabilities
 - **2025-01-12**: Implemented professional three-panel UI with tabbed settings (Basic/Advanced)

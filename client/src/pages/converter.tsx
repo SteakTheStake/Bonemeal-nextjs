@@ -47,18 +47,18 @@ export default function Converter() {
   }, [jobs, activeJob]);
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
+    <div className="h-screen flex flex-col bg-background text-foreground organic-bg">
       {/* Top Menu Bar */}
-      <header className="surface border-b border-border px-4 py-2 flex items-center justify-between">
+      <header className="moss-card border-b living-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <img 
               src={bonemeaLogo} 
               alt="Bonemeal" 
-              className="w-6 h-6" 
+              className="w-6 h-6 floating" 
               style={{ imageRendering: 'pixelated' }}
             />
-            <span className="text-lg font-semibold">Bonemeal</span>
+            <span className="text-lg font-semibold text-primary">Bonemeal</span>
           </div>
           <div className="flex items-center space-x-1 text-xs text-muted-foreground">
             <span>v1.3</span>
@@ -67,12 +67,12 @@ export default function Converter() {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/20">
-            <HelpCircle className="h-4 w-4 mr-1" />
+          <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/20 grow-button">
+            <HelpCircle className="h-4 w-4 mr-1 branch-sway" />
             Help
           </Button>
-          <Button variant="ghost" size="sm">
-            <Settings className="h-4 w-4 mr-1" />
+          <Button variant="ghost" size="sm" className="grow-button">
+            <Settings className="h-4 w-4 mr-1 branch-sway" />
             Settings
           </Button>
         </div>
@@ -81,17 +81,17 @@ export default function Converter() {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="w-80 surface border-r border-border flex flex-col">
+        <aside className="w-80 moss-card border-r living-border flex flex-col">
           {/* Project Panel */}
-          <div className="p-4 border-b border-border">
-            <h2 className="text-sm font-medium text-muted-foreground mb-3">Project</h2>
+          <div className="p-4 border-b living-border">
+            <h2 className="text-sm font-medium text-muted-foreground mb-3">🌱 Project</h2>
             <div className="space-y-2">
-              <Button className="w-full" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="w-full grow-button" size="sm">
+                <Plus className="h-4 w-4 mr-2 branch-sway" />
                 New Project
               </Button>
-              <Button variant="secondary" className="w-full" size="sm">
-                <FolderOpen className="h-4 w-4 mr-2" />
+              <Button variant="secondary" className="w-full grow-button" size="sm">
+                <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
                 Open Project
               </Button>
             </div>
@@ -100,9 +100,9 @@ export default function Converter() {
           {/* Settings Tabs */}
           <div className="flex-1 overflow-y-auto">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 m-4">
-                <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
-                <TabsTrigger value="advanced" className="text-xs">Advanced</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 m-4 moss-card">
+                <TabsTrigger value="basic" className="text-xs grow-button">🌿 Basic</TabsTrigger>
+                <TabsTrigger value="advanced" className="text-xs grow-button">🔬 Advanced</TabsTrigger>
               </TabsList>
               
               <TabsContent value="basic" className="mt-0">
@@ -133,12 +133,12 @@ export default function Converter() {
         </main>
 
         {/* Right Panel */}
-        <aside className="w-80 surface border-l border-border flex flex-col">
+        <aside className="w-80 moss-card border-l living-border flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="progress">Progress</TabsTrigger>
-              <TabsTrigger value="validation">Validation</TabsTrigger>
-              <TabsTrigger value="batch">Batch</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 moss-card">
+              <TabsTrigger value="progress" className="grow-button">🌿 Progress</TabsTrigger>
+              <TabsTrigger value="validation" className="grow-button">✨ Validation</TabsTrigger>
+              <TabsTrigger value="batch" className="grow-button">🎯 Batch</TabsTrigger>
             </TabsList>
             
             <TabsContent value="progress" className="flex-1 overflow-y-auto">

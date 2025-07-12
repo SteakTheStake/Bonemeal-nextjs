@@ -37,18 +37,18 @@ export function ProgressPanel({ job, processingStatus }: ProgressPanelProps) {
   };
 
   return (
-    <div className="p-4 flex flex-col h-full">
-      <h3 className="text-sm font-medium mb-3">Processing Status</h3>
+    <div className="p-4 flex flex-col h-full organic-bg">
+      <h3 className="text-sm font-medium mb-3 text-primary">🌿 Growth Progress</h3>
       
       {/* Current Task */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-muted-foreground">Current Task</span>
           <span className="text-xs text-foreground">
-            {processingStatus?.currentTask || 'Idle'}
+            {processingStatus?.currentTask || 'Ready to grow'}
           </span>
         </div>
-        <Progress value={job.progress || 0} className="w-full" />
+        <Progress value={job.progress || 0} className="w-full progress-grow" />
       </div>
 
       {/* Processing Log */}

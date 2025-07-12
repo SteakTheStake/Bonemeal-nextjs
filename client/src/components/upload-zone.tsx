@@ -130,29 +130,30 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
   return (
     <div className="flex-1 p-6">
       <div 
-        className={`h-full border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors ${
-          isDragging ? "border-primary/50 bg-primary/5" : "border-border hover:border-primary/50"
+        className={`h-full border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors organic-bg ${
+          isDragging ? "living-border bg-primary/10" : "border-border hover:living-border"
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <div className="text-center">
-          <CloudUpload className="h-16 w-16 text-muted-foreground mb-4 mx-auto" />
-          <h3 className="text-xl font-medium mb-2">Drop your images here</h3>
+          <CloudUpload className="h-16 w-16 text-primary mb-4 mx-auto floating" />
+          <h3 className="text-xl font-medium mb-2 text-primary">Drop your textures here</h3>
           <p className="text-muted-foreground mb-2">
             Supported formats: PNG, JPG, TIFF, TGA, ZIP
           </p>
-          <p className="text-xs text-purple-400 mb-4">
+          <p className="text-sm text-primary mb-4 branch-sway">
             🌱 Let Bonemeal grow your texture productivity
           </p>
           <div className="space-y-2">
             <Button 
               onClick={handleBrowseFiles}
               disabled={uploadMutation.isPending}
+              className="grow-button"
             >
-              <FolderOpen className="h-4 w-4 mr-2" />
-              {uploadMutation.isPending ? "Processing with Bonemeal..." : "Browse Files"}
+              <FolderOpen className="h-4 w-4 mr-2 branch-sway" />
+              {uploadMutation.isPending ? "Growing with Bonemeal..." : "Browse Files"}
             </Button>
             <div className="text-xs text-muted-foreground">
               or drag a resource pack ZIP file (max 200MB)

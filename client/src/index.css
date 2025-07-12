@@ -3,33 +3,36 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(240, 10%, 3.9%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(207, 90%, 54%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --background: hsl(280, 15%, 8%);
+  --foreground: hsl(0, 0%, 95%);
+  --muted: hsl(285, 20%, 16%);
+  --muted-foreground: hsl(280, 12%, 65%);
+  --popover: hsl(285, 20%, 12%);
+  --popover-foreground: hsl(0, 0%, 95%);
+  --card: hsl(285, 20%, 12%);
+  --card-foreground: hsl(0, 0%, 95%);
+  --border: hsl(285, 20%, 20%);
+  --input: hsl(285, 20%, 16%);
+  --primary: hsl(120, 35%, 65%);
+  --primary-foreground: hsl(285, 30%, 15%);
+  --secondary: hsl(285, 25%, 18%);
+  --secondary-foreground: hsl(120, 25%, 88%);
+  --accent: hsl(270, 40%, 55%);
+  --accent-foreground: hsl(120, 25%, 92%);
+  --destructive: hsl(0, 50%, 45%);
+  --destructive-foreground: hsl(0, 0%, 95%);
+  --ring: hsl(120, 35%, 65%);
   --radius: 0.5rem;
   
-  /* Custom colors for LabPBR app */
-  --surface: hsl(240, 8%, 11.8%);
-  --elevated: hsl(240, 6%, 17.6%);
-  --success: hsl(122, 39%, 49%);
-  --warning: hsl(38, 92%, 58%);
-  --error: hsl(4, 90%, 58%);
+  /* Custom organic colors for Bonemeal */
+  --surface: hsl(285, 18%, 14%);
+  --elevated: hsl(285, 22%, 18%);
+  --success: hsl(120, 45%, 55%);
+  --warning: hsl(45, 70%, 65%);
+  --error: hsl(0, 55%, 50%);
+  --growth: hsl(120, 50%, 70%);
+  --earth: hsl(30, 35%, 40%);
+  --bloom: hsl(270, 60%, 75%);
 }
 
 @layer base {
@@ -139,5 +142,79 @@
     image-rendering: pixelated;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
+  }
+
+  /* Organic growing animations */
+  @keyframes grow {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 5px hsl(120, 35%, 65%, 0.3); }
+    50% { box-shadow: 0 0 20px hsl(120, 35%, 65%, 0.6); }
+    100% { box-shadow: 0 0 5px hsl(120, 35%, 65%, 0.3); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+
+  @keyframes branch-sway {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(0.5deg); }
+    75% { transform: rotate(-0.5deg); }
+  }
+
+  /* Growing button effects */
+  .grow-button:hover {
+    animation: grow 0.6s ease-in-out;
+    background: linear-gradient(135deg, 
+      hsl(120, 35%, 65%) 0%, 
+      hsl(120, 45%, 55%) 50%, 
+      hsl(120, 35%, 65%) 100%);
+  }
+
+  /* Organic background patterns */
+  .organic-bg {
+    background: radial-gradient(circle at 20% 80%, hsl(285, 20%, 12%, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, hsl(270, 40%, 55%, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, hsl(120, 35%, 65%, 0.1) 0%, transparent 50%);
+  }
+
+  /* Living borders that pulse */
+  .living-border {
+    border: 1px solid hsl(120, 35%, 65%, 0.3);
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* Floating elements */
+  .floating {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  /* Swaying elements like branches */
+  .branch-sway {
+    animation: branch-sway 6s ease-in-out infinite;
+  }
+
+  /* Moss-like texture for cards */
+  .moss-card {
+    background: linear-gradient(135deg, 
+      hsl(285, 20%, 12%) 0%, 
+      hsl(285, 25%, 14%) 30%, 
+      hsl(120, 20%, 10%) 70%, 
+      hsl(285, 20%, 12%) 100%);
+  }
+
+  /* Growing progress bars */
+  .progress-grow {
+    background: linear-gradient(90deg, 
+      hsl(120, 50%, 70%) 0%, 
+      hsl(120, 45%, 55%) 50%, 
+      hsl(120, 60%, 75%) 100%);
+    animation: grow 2s ease-in-out infinite;
   }
 }
