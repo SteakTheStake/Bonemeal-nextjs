@@ -1,12 +1,14 @@
-# LabPBR Texture Converter
+# Bonemeal - LabPBR Texture Converter
 
 ## Overview
 
-This is a full-stack web application that converts standard textures to LabPBR format, which is a standard for physically based rendering (PBR) in shader packs. The application provides a modern React frontend with texture processing capabilities on the backend, designed to help texture artists and developers convert their materials to the LabPBR specification.
+Bonemeal is a full-stack web application that converts standard textures to LabPBR format for Minecraft shader packs. Named after Minecraft's growth-enhancing bonemeal, this tool helps "grow" your productivity through automated texture processing. The application provides a modern React frontend with advanced texture processing capabilities on the backend, designed to help texture artists and developers convert their materials to the LabPBR specification.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+App name: "Bonemeal" - emphasizing productivity growth through automation
+Branding: Minecraft enchanted bonemeal gif as logo, growth/productivity theme
 
 ## System Architecture
 
@@ -102,6 +104,7 @@ The application is configured for development and production environments:
   - **CTM Split**: OptiFine Connected Textures Mod format generation with up to 47 variations
 
 ### Recent Changes
+- **2025-01-12**: Rebranded application to "Bonemeal" with Minecraft enchanted bonemeal gif logo
 - **2025-01-12**: Added advanced processing suite with bulk resize, compression, and CTM split capabilities
 - **2025-01-12**: Implemented professional three-panel UI with tabbed settings (Basic/Advanced)
 - **2025-01-12**: Added support for independent texture resolution control (16x to 2048x)

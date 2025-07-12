@@ -11,6 +11,7 @@ import { ValidationPanel } from "@/components/validation-panel";
 import { BatchPanel } from "@/components/batch-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
+import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export default function Converter() {
   const [activeJob, setActiveJob] = useState<number | null>(null);
@@ -51,13 +52,18 @@ export default function Converter() {
       <header className="surface border-b border-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Box className="text-primary text-xl" />
-            <span className="text-lg font-semibold">LabPBR Texture Suite</span>
+            <img 
+              src={bonemeaLogo} 
+              alt="Bonemeal" 
+              className="w-6 h-6" 
+              style={{ imageRendering: 'pixelated' }}
+            />
+            <span className="text-lg font-semibold">Bonemeal</span>
           </div>
           <div className="flex items-center space-x-1 text-xs text-muted-foreground">
             <span>v1.3</span>
             <span>•</span>
-            <span>Professional Edition</span>
+            <span>LabPBR Converter</span>
           </div>
         </div>
         <div className="flex items-center space-x-2">

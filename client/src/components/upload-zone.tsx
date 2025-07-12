@@ -140,8 +140,11 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
         <div className="text-center">
           <CloudUpload className="h-16 w-16 text-muted-foreground mb-4 mx-auto" />
           <h3 className="text-xl font-medium mb-2">Drop your images here</h3>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground mb-2">
             Supported formats: PNG, JPG, TIFF, TGA, ZIP
+          </p>
+          <p className="text-xs text-purple-400 mb-4">
+            🌱 Let Bonemeal grow your texture productivity
           </p>
           <div className="space-y-2">
             <Button 
@@ -149,7 +152,7 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
               disabled={uploadMutation.isPending}
             >
               <FolderOpen className="h-4 w-4 mr-2" />
-              {uploadMutation.isPending ? "Uploading..." : "Browse Files"}
+              {uploadMutation.isPending ? "Processing with Bonemeal..." : "Browse Files"}
             </Button>
             <div className="text-xs text-muted-foreground">
               or drag a resource pack ZIP file (max 200MB)
