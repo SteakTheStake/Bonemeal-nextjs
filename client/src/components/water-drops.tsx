@@ -21,6 +21,9 @@ interface WaterParticle {
   size: number;
   onSurface: boolean;
   surfaceTime: number;
+  isDroplet: boolean;
+  trail: { position: THREE.Vector3; opacity: number }[];
+  splashParticles?: WaterParticle[];
 }
 
 interface UIBoundary {
@@ -39,11 +42,12 @@ export function PhysicsWaterSystem() {
   const particlesRef = useRef<WaterParticle[]>([]);
   const boundariesRef = useRef<UIBoundary[]>([]);
 
-  // Physics constants
-  const GRAVITY = new THREE.Vector3(0, -0.0015, 0);
-  const WIND = new THREE.Vector3(0.0002, 0, 0);
-  const SURFACE_TENSION = 0.92;
-  const PARTICLE_LIMIT = 120; // Increased for more visible water
+  // Physics constants - Enhanced for dramatic effects
+  const GRAVITY = new THREE.Vector3(0, -0.004, 0); // Stronger gravity
+  const WIND = new THREE.Vector3(0.001 * (Math.random() - 0.5), 0, 0); // Stronger random wind
+  const SURFACE_TENSION = 0.85;
+  const PARTICLE_LIMIT = 180; // More particles for dramatic effect
+  const SPLASH_PARTICLES = 12; // More particles per splash
   
   const updateUIBoundaries = useCallback(() => {
     const boundaries: UIBoundary[] = [];
@@ -69,60 +73,96 @@ export function PhysicsWaterSystem() {
     boundariesRef.current = boundaries;
   }, []);
 
-  const checkCollisionWithUI = useCallback((particle: WaterParticle): boolean => {
+  const checkCollisionWithUI = useCallback((particle: WaterParticle, scene: THREE.Scene): { collision: boolean; createSplash: boolean } => {
     const pos = particle.mesh.position;
+    let createSplash = false;
     
     for (const boundary of boundariesRef.current) {
       if (pos.x >= boundary.left && pos.x <= boundary.right &&
           pos.y >= boundary.bottom && pos.y <= boundary.top) {
         
-        // Water flows off edges
-        if (pos.x <= boundary.left + 0.5 || pos.x >= boundary.right - 0.5) {
-          particle.velocity.x += (pos.x < (boundary.left + boundary.right) / 2) ? -0.001 : 0.001;
+        // Create splash on impact with UI elements
+        if (!particle.onSurface && particle.velocity.y < -0.002) {
+          createSplash = true;
+          // Create splash particles directly in collision detection
+          for (let i = 0; i < SPLASH_PARTICLES; i++) {
+            const angle = (Math.PI * 2 * i) / SPLASH_PARTICLES + Math.random() * 0.3;
+            const speed = 0.002 + Math.random() * 0.004;
+            
+            const splashParticle = createParticle(
+              pos.x + (Math.random() - 0.5) * 0.2,
+              pos.y + Math.random() * 0.1,
+              false, // splash particle
+              new THREE.Vector3(
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed * 0.5 + 0.001, // Slight upward motion
+                0
+              )
+            );
+            
+            scene.add(splashParticle.mesh);
+            particlesRef.current.push(splashParticle);
+          }
         }
         
-        // Flow down from bottom edge
-        if (pos.y <= boundary.bottom + 0.3) {
-          particle.velocity.y -= 0.002;
-          particle.velocity.x += (Math.random() - 0.5) * 0.0005; // Slight spread
-          return false; // Let it continue falling
+        // Water flows off edges dramatically
+        if (pos.x <= boundary.left + 0.8 || pos.x >= boundary.right - 0.8) {
+          particle.velocity.x += (pos.x < (boundary.left + boundary.right) / 2) ? -0.003 : 0.003;
+          particle.velocity.y *= 0.7; // Slow down vertical movement
         }
         
-        return true; // On surface
+        // Pour down from bottom edge with more drama
+        if (pos.y <= boundary.bottom + 0.5) {
+          particle.velocity.y -= 0.004; // Faster pour
+          particle.velocity.x += (Math.random() - 0.5) * 0.002; // More spread
+          return { collision: false, createSplash }; // Let it continue falling
+        }
+        
+        return { collision: true, createSplash }; // On surface
       }
     }
-    return false;
+    return { collision: false, createSplash };
   }, []);
 
-  const createParticle = useCallback((x?: number, y?: number): WaterParticle => {
-    const size = 0.03 + Math.random() * 0.05; // Larger water droplets
+  const createParticle = useCallback((
+    x?: number, 
+    y?: number, 
+    isDroplet: boolean = true,
+    customVelocity?: THREE.Vector3
+  ): WaterParticle => {
+    const size = isDroplet ? (0.04 + Math.random() * 0.06) : (0.02 + Math.random() * 0.03); // Larger droplets
     const dropGeometry = new THREE.SphereGeometry(size, 8, 8);
     const dropMaterial = new THREE.MeshBasicMaterial({ 
-      color: new THREE.Color().setHSL(0.55 + Math.random() * 0.1, 0.8, 0.7),
+      color: new THREE.Color().setHSL(0.55 + Math.random() * 0.1, 0.9, 0.75),
       transparent: true, 
-      opacity: 0.95 // Much more visible
+      opacity: isDroplet ? 0.98 : 0.85 // Higher opacity for main droplets
     });
 
     const mesh = new THREE.Mesh(dropGeometry, dropMaterial);
     mesh.position.set(
-      x ?? (Math.random() - 0.5) * 18,
-      y ?? 12 + Math.random() * 3,
-      (Math.random() - 0.5) * 2
+      x ?? (Math.random() - 0.5) * 20, // Wider spawn area
+      y ?? 12 + Math.random() * 4,
+      (Math.random() - 0.5) * 3
+    );
+
+    const velocity = customVelocity || new THREE.Vector3(
+      (Math.random() - 0.5) * 0.01, // Much more horizontal randomness for drama
+      -0.005 - Math.random() * 0.008, // Faster, more varied falling speeds
+      0
     );
 
     return {
       mesh,
-      velocity: new THREE.Vector3(
-        (Math.random() - 0.5) * 0.003,
-        -0.002 - Math.random() * 0.004, // Faster falling
-        0
-      ),
+      velocity,
       acceleration: new THREE.Vector3(0, 0, 0),
       life: 1.0,
-      maxLife: 10000 + Math.random() * 8000, // Longer lifespan
+      maxLife: isDroplet ? (12000 + Math.random() * 10000) : (3000 + Math.random() * 2000),
       size,
       onSurface: false,
-      surfaceTime: 0
+      surfaceTime: 0,
+      isDroplet,
+      trail: [],
+      splashParticles: undefined
     };
   }, []);
 
@@ -196,8 +236,9 @@ export function PhysicsWaterSystem() {
         particle.acceleration.copy(GRAVITY);
         particle.acceleration.add(WIND);
         
-        // Add turbulence near UI elements
-        const onUI = checkCollisionWithUI(particle);
+        // Add turbulence near UI elements with splash detection
+        const collisionResult = checkCollisionWithUI(particle, scene);
+        const onUI = collisionResult.collision;
         
         if (onUI) {
           particle.onSurface = true;
@@ -251,12 +292,20 @@ export function PhysicsWaterSystem() {
         }
       });
 
-      // More frequent particle spawning on home page
-      const spawnRate = window.location.pathname === '/' ? 0.04 : 0.02;
+      // Much more frequent and random particle spawning on home page
+      const spawnRate = window.location.pathname === '/' ? 0.08 : 0.03; // Double spawn rate
       if (Math.random() < spawnRate && particles.length < PARTICLE_LIMIT) {
-        const newParticle = createParticle();
-        scene.add(newParticle.mesh);
-        particles.push(newParticle);
+        // Create burst spawning occasionally for dramatic effect
+        const burstCount = Math.random() < 0.1 ? 3 + Math.floor(Math.random() * 3) : 1;
+        
+        for (let i = 0; i < burstCount && particles.length < PARTICLE_LIMIT; i++) {
+          const newParticle = createParticle(
+            (Math.random() - 0.5) * 22, // Wider spawn area
+            12 + Math.random() * 5 // Higher spawn height
+          );
+          scene.add(newParticle.mesh);
+          particles.push(newParticle);
+        }
       }
 
       renderer.render(scene, camera);
@@ -290,11 +339,12 @@ export function PhysicsWaterSystem() {
   return (
     <div 
       ref={mountRef} 
-      className="pointer-events-none fixed inset-0 z-10"
+      className="pointer-events-none fixed inset-0"
       style={{ 
+        zIndex: 9999, // Front of blur backgrounds for clear viewing
         mixBlendMode: window.location.pathname === '/' ? 'normal' : 'multiply',
-        filter: window.location.pathname === '/' ? 'contrast(1.2) brightness(1.1) drop-shadow(0 0 3px rgba(135,206,235,0.6))' : 'contrast(1.1) brightness(0.9)',
-        opacity: window.location.pathname === '/' ? 1 : 0.8
+        filter: window.location.pathname === '/' ? 'contrast(1.3) brightness(1.2) drop-shadow(0 0 4px rgba(135,206,235,0.8)) saturate(1.2)' : 'contrast(1.1) brightness(0.9)',
+        opacity: window.location.pathname === '/' ? 1 : 0.85
       }}
     />
   );
@@ -320,7 +370,7 @@ export function MinecraftFarmlandFooter() {
         style={{
           backgroundImage: `url('${farmlandTexture}')`,
           backgroundRepeat: 'repeat',
-          backgroundSize: '64px 64px',
+          backgroundSize: '128px 128px', // Doubled size for better detail visibility
           imageRendering: 'pixelated'
         }}
       />
@@ -334,10 +384,10 @@ export function MinecraftFarmlandFooter() {
             style={{
               backgroundImage: `url('${wetFarmlandTexture}')`,
               backgroundRepeat: 'no-repeat',
-              backgroundSize: '64px 64px',
+              backgroundSize: '128px 128px',
               imageRendering: 'pixelated',
-              width: '64px',
-              height: '64px',
+              width: '128px',
+              height: '128px',
               left: `${Math.random() * 80}%`,
               top: `${Math.random() * 50}%`,
               animationDelay: `${Math.random() * 3}s`,
@@ -351,7 +401,7 @@ export function MinecraftFarmlandFooter() {
       <div className="absolute inset-0">
         {[...Array(12)].map((_, i) => {
           const plantImage = plantImages[Math.floor(Math.random() * plantImages.length)];
-          const scale = 0.8 + Math.random() * 0.6; // Random scale 0.8-1.4
+          const scale = 1.2 + Math.random() * 0.8; // Larger plants: Random scale 1.2-2.0
           
           return (
             <div
@@ -362,8 +412,8 @@ export function MinecraftFarmlandFooter() {
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'contain',
                 imageRendering: 'pixelated',
-                width: `${20 * scale}px`,
-                height: `${20 * scale}px`,
+                width: `${32 * scale}px`,
+                height: `${32 * scale}px`,
                 left: `${5 + Math.random() * 85}%`,
                 top: `${10 + Math.random() * 60}%`,
                 animationDelay: `${Math.random() * 4}s`,
