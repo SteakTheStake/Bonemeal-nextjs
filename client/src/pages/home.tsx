@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import RainAnimation from "@/components/rain-animation";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export default function Home() {
@@ -46,7 +47,8 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background organic-bg">
+    <div className="min-h-screen bg-background organic-bg relative">
+      <RainAnimation />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />

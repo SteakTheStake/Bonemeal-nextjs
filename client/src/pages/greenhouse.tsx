@@ -17,6 +17,7 @@ import TextureEditor from "@/components/texture-editor";
 import AITextureGenerator from "@/components/ai-texture-generator";
 import TemplateLibrary from "@/components/template-library";
 import BatchProcessor from "@/components/batch-processor";
+import TextureQualityAnalyzer from "@/components/texture-quality-analyzer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -28,7 +29,7 @@ export default function Greenhouse() {
   const [activeTab, setActiveTab] = useState("progress");
   const [validationResults, setValidationResults] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
-  const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch'>('convert');
+  const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch' | 'quality'>('convert');
 
   const { data: jobs } = useQuery<ConversionJob[]>({
     queryKey: ["/api/jobs"],
@@ -66,6 +67,7 @@ export default function Greenhouse() {
     { key: 'ai', label: 'AI Generate', icon: Sparkles, description: 'AI-powered generation' },
     { key: 'templates', label: 'Templates', icon: Package, description: 'Material templates' },
     { key: 'batch', label: 'Batch', icon: Box, description: 'Bulk processing' },
+    { key: 'quality', label: 'Quality', icon: Settings, description: 'Texture quality analysis' },
   ];
 
   return (
@@ -193,6 +195,18 @@ export default function Greenhouse() {
           {mainView === 'batch' && (
             <div className="flex-1 p-4 overflow-auto">
               <BatchProcessor />
+            </div>
+          )}
+
+          {mainView === 'quality' && (
+            <div className="flex-1 p-4 overflow-auto">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center space-y-2 mb-8">
+                  <h1 className="text-2xl font-bold text-foreground">Quality Analyzer</h1>
+                  <p className="text-muted-foreground">Analyze texture quality and get optimization recommendations</p>
+                </div>
+                <TextureQualityAnalyzer />
+              </div>
             </div>
           )}
         </div>
