@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Projects from "@/pages/projects";
 import Greenhouse from "@/pages/greenhouse";
 import Docs from "@/pages/docs";
+import JoinProject from "@/pages/join-project";
 import { useLocation } from "wouter";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
           <Route path="/projects" component={Projects} />
           <Route path="/greenhouse" component={Greenhouse} />
           <Route path="/docs" component={Docs} />
+          <Route path="/join/:inviteCode" component={JoinProject} />
           <Route component={NotFound} />
         </Switch>
       </div>

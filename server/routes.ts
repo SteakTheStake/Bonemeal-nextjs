@@ -89,6 +89,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project sharing routes
+  app.post("/api/projects/:id/invite", isOptionallyAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      const { expiresInHours = 24 } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Check if user owns the project
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      if (project.userId !== userId) {
+        return res.status(403).json({ message: "Only project owners can generate invites" });
+      }
+
+      const inviteCode = await storage.generateProjectInvite(projectId, expiresInHours);
+      res.json({ 
+        inviteCode,
+        inviteUrl: `${req.protocol}://${req.get('host')}/join/${inviteCode}`,
+        expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000)
+      });
+    } catch (error) {
+      console.error("Error generating project invite:", error);
+      res.status(500).json({ message: "Failed to generate invite" });
+    }
+  });
+
+  app.post("/api/projects/join/:inviteCode", isOptionallyAuthenticated, async (req: any, res) => {
+    try {
+      const { inviteCode } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required to join projects" });
+      }
+
+      const project = await storage.joinProjectByInvite(inviteCode, userId);
+      if (!project) {
+        return res.status(404).json({ message: "Invalid or expired invite" });
+      }
+
+      res.json({ project, message: "Successfully joined project" });
+    } catch (error) {
+      console.error("Error joining project:", error);
+      res.status(500).json({ message: "Failed to join project" });
+    }
+  });
+
   // Get all conversion jobs
   app.get("/api/jobs", async (req, res) => {
     try {

@@ -1,4 +1,7 @@
-import { projects, conversionJobs, textureFiles, users, type Project, type InsertProject, type ConversionJob, type InsertConversionJob, type TextureFile, type InsertTextureFile, type ValidationIssue, type ProcessingStatus, type User, type UpsertUser } from "@shared/schema";
+import { projects, conversionJobs, textureFiles, users, projectShares, type Project, type InsertProject, type ConversionJob, type InsertConversionJob, type TextureFile, type InsertTextureFile, type ValidationIssue, type ProcessingStatus, type User, type UpsertUser, type ProjectShare, type InsertProjectShare } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, and, or } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 export interface IStorage {
   // Users
@@ -12,6 +15,14 @@ export interface IStorage {
   updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
   getAllProjects(userId?: string): Promise<Project[]>;
+  
+  // Project sharing
+  generateProjectInvite(projectId: number, expiresInHours?: number): Promise<string>;
+  joinProjectByInvite(inviteCode: string, userId: string): Promise<Project | null>;
+  shareProject(projectId: number, sharedByUserId: string, sharedWithUserId: string, permission: 'view' | 'edit'): Promise<ProjectShare>;
+  getProjectShares(projectId: number): Promise<ProjectShare[]>;
+  getUserProjectShares(userId: string): Promise<Project[]>;
+  removeProjectShare(projectId: number, userId: string): Promise<boolean>;
   
   // Conversion jobs
   createConversionJob(job: InsertConversionJob): Promise<ConversionJob>;
@@ -221,6 +232,60 @@ export class MemStorage implements IStorage {
 
   async updateProcessingStatus(jobId: number, status: ProcessingStatus): Promise<void> {
     this.processingStatus.set(jobId, status);
+  }
+
+  // Project sharing methods
+  async generateProjectInvite(projectId: number, expiresInHours = 24): Promise<string> {
+    const project = this.projects.get(projectId);
+    if (!project) throw new Error(`Project ${projectId} not found`);
+    
+    const inviteCode = nanoid(12);
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + expiresInHours);
+    
+    const updatedProject = { ...project, inviteCode, inviteExpiresAt: expiresAt };
+    this.projects.set(projectId, updatedProject);
+    
+    return inviteCode;
+  }
+
+  async joinProjectByInvite(inviteCode: string, userId: string): Promise<Project | null> {
+    const project = Array.from(this.projects.values()).find(p => p.inviteCode === inviteCode);
+    if (!project) return null;
+    
+    // Check if invite is expired
+    if (project.inviteExpiresAt && new Date() > project.inviteExpiresAt) {
+      return null;
+    }
+    
+    return project;
+  }
+
+  async shareProject(projectId: number, sharedByUserId: string, sharedWithUserId: string, permission: 'view' | 'edit'): Promise<ProjectShare> {
+    // For MemStorage, we'll just return a mock share object
+    return {
+      id: Date.now(),
+      projectId,
+      sharedByUserId,
+      sharedWithUserId,
+      permission,
+      joinedAt: new Date(),
+      createdAt: new Date()
+    };
+  }
+
+  async getProjectShares(projectId: number): Promise<ProjectShare[]> {
+    // For MemStorage, return empty array
+    return [];
+  }
+
+  async getUserProjectShares(userId: string): Promise<Project[]> {
+    // For MemStorage, return empty array
+    return [];
+  }
+
+  async removeProjectShare(projectId: number, userId: string): Promise<boolean> {
+    return true;
   }
 }
 

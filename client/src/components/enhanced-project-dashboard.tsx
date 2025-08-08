@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { type Project, type ConversionJob } from "@shared/schema";
 import { format } from "date-fns";
+import ProjectShareDialog from "./project-share-dialog";
 
 interface ProjectFile {
   id: string;
@@ -335,6 +336,10 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
+              <ProjectShareDialog 
+                projectId={selectedProject.id} 
+                projectName={selectedProject.name} 
+              />
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings

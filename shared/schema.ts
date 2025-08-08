@@ -34,8 +34,22 @@ export const projects = pgTable("projects", {
   description: text("description"),
   status: text("status").notNull().default('active'),
   textureCount: integer("texture_count").default(0),
+  isPublic: boolean("is_public").default(false),
+  inviteCode: varchar("invite_code").unique(),
+  inviteExpiresAt: timestamp("invite_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Project shares table for tracking shared access
+export const projectShares = pgTable("project_shares", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  sharedWithUserId: varchar("shared_with_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sharedByUserId: varchar("shared_by_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  permission: text("permission").notNull().default('view'), // 'view' | 'edit'
+  joinedAt: timestamp("joined_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const conversionJobs = pgTable("conversion_jobs", {
@@ -71,6 +85,16 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+
+// Project share schemas
+export const insertProjectShareSchema = createInsertSchema(projectShares).omit({
+  id: true,
+  createdAt: true,
+  joinedAt: true,
+});
+
+export type InsertProjectShare = z.infer<typeof insertProjectShareSchema>;
+export type ProjectShare = typeof projectShares.$inferSelect;
 
 // User schemas
 export const insertUserSchema = createInsertSchema(users).omit({
