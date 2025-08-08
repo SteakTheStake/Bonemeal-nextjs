@@ -22,8 +22,15 @@ import {
   Brush,
   Box,
   Sparkles,
-  FolderOpen
+  FolderOpen,
+  FlaskConical,
+  Gem,
+  Droplets,
+  User,
+  Shield,
+  Search
 } from "lucide-react";
+import F0Analyzer from "@/components/f0-analyzer";
 
 export default function DocsPage() {
   const labpbrFeatures = [
