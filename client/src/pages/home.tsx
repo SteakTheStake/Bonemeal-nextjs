@@ -201,11 +201,11 @@ export default function Home() {
             </span>
           </div>
           <div className="flex space-x-4 text-sm text-muted-foreground">
-            <Link href="/converter">
-              <a className="hover:text-primary">Quick Convert</a>
+            <Link href="/converter" className="hover:text-primary">
+              Quick Convert
             </Link>
-            <Link href="/projects">
-              <a className="hover:text-primary">Projects</a>
+            <Link href="/projects" className="hover:text-primary">
+              Projects
             </Link>
             <a href="https://github.com/sp614x/optifine/blob/master/OptiFineDoc/doc/shaders.txt" 
                target="_blank" 

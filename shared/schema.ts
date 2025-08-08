@@ -36,10 +36,22 @@ export const textureFiles = pgTable("texture_files", {
   validationIssues: json("validation_issues").default([]),
 });
 
+// Project schemas
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  textureCount: true,
+});
+
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+
 export const insertConversionJobSchema = createInsertSchema(conversionJobs).pick({
   filename: true,
   status: true,
   settings: true,
+  projectId: true,
 });
 
 export const insertTextureFileSchema = createInsertSchema(textureFiles).pick({
