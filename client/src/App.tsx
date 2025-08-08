@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
 import Converter from "@/pages/converter";
+import Studio from "@/pages/studio";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/projects" component={Projects} />
       <Route path="/converter" component={Converter} />
+      <Route path="/studio" component={Studio} />
       <Route component={NotFound} />
     </Switch>
   );

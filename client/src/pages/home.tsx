@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download } from "lucide-react";
+import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -71,16 +71,22 @@ export default function Home() {
               Perfect for resource pack creators and shader enthusiasts.
             </p>
             <div className="flex gap-4 justify-center">
-              <Link href="/projects">
+              <Link href="/studio">
                 <Button size="lg" className="grow-button moss-texture">
-                  <Zap className="mr-2 h-5 w-5" />
-                  Start Converting
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Open Studio
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/converter">
                 <Button size="lg" variant="outline" className="grow-button">
                   Quick Convert
+                </Button>
+              </Link>
+              <Link href="/projects">
+                <Button size="lg" variant="outline" className="grow-button">
+                  <FolderOpen className="mr-2 h-5 w-5" />
+                  View Projects
                 </Button>
               </Link>
             </div>

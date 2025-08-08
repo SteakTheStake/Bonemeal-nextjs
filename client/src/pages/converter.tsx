@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Box, HelpCircle, Settings, Plus, FolderOpen } from "lucide-react";
+import { Link, useSearch } from "wouter";
+import { Box, HelpCircle, Settings, Plus, FolderOpen, Sparkles, Brush, Package, Zap, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
 import { TexturePreview } from "@/components/texture-preview";
@@ -10,15 +11,23 @@ import { ProgressPanel } from "@/components/progress-panel";
 import { ValidationPanel } from "@/components/validation-panel";
 import { BatchPanel } from "@/components/batch-panel";
 import { FilesPanel } from "@/components/files-panel";
+import ProjectDashboard from "@/components/project-dashboard";
+import TextureEditor from "@/components/texture-editor";
+import AITextureGenerator from "@/components/ai-texture-generator";
+import TemplateLibrary from "@/components/template-library";
+import BatchProcessor from "@/components/batch-processor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export default function Converter() {
+  const searchParams = useSearch();
+  const projectId = searchParams ? parseInt(searchParams.replace('?project=', '')) : undefined;
   const [activeJob, setActiveJob] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("progress");
   const [validationResults, setValidationResults] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch'>('convert');
 
   const { data: jobs } = useQuery<ConversionJob[]>({
     queryKey: ["/api/jobs"],
