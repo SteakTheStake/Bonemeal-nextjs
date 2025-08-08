@@ -4,10 +4,12 @@ import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
 import { insertConversionJobSchema, type ConversionSettings, type ProcessingStatus } from "@shared/schema";
+import { setupDiscordAuth, isAuthenticated, isOptionallyAuthenticated } from "./discordAuth";
 
 // Extend Express Request interface for multer
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
+  files?: Express.Multer.File[];
 }
 import { TextureProcessor } from "./services/texture-processor";
 import { LabPBRConverter } from "./services/labpbr-converter";
@@ -23,10 +25,14 @@ const labpbrConverter = new LabPBRConverter();
 const zipHandler = new ZipHandler();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Project routes
-  app.get("/api/projects", async (req, res) => {
+  // Setup authentication
+  await setupDiscordAuth(app);
+  
+  // Project routes (protected)
+  app.get("/api/projects", isOptionallyAuthenticated, async (req: any, res) => {
     try {
-      const projects = await storage.getAllProjects();
+      const userId = req.user?.id;
+      const projects = await storage.getAllProjects(userId);
       res.json(projects);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -34,13 +40,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", isOptionallyAuthenticated, async (req: any, res) => {
     try {
       const { name, description } = req.body;
       if (!name) {
         return res.status(400).json({ message: "Project name is required" });
       }
-      const project = await storage.createProject({ name, description, status: 'active' });
+      const userId = req.user?.id;
+      const project = await storage.createProject({ 
+        name, 
+        description, 
+        status: 'active',
+        userId 
+      });
       res.json(project);
     } catch (error) {
       console.error('Error creating project:', error);

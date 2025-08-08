@@ -1,12 +1,17 @@
-import { projects, conversionJobs, textureFiles, type Project, type InsertProject, type ConversionJob, type InsertConversionJob, type TextureFile, type InsertTextureFile, type ValidationIssue, type ProcessingStatus } from "@shared/schema";
+import { projects, conversionJobs, textureFiles, users, type Project, type InsertProject, type ConversionJob, type InsertConversionJob, type TextureFile, type InsertTextureFile, type ValidationIssue, type ProcessingStatus, type User, type UpsertUser } from "@shared/schema";
 
 export interface IStorage {
+  // Users
+  getUser(id: string): Promise<User | undefined>;
+  getUserByDiscordId(discordId: string): Promise<User | undefined>;
+  upsertUserByDiscordId(userData: Omit<UpsertUser, 'id'>): Promise<User>;
+  
   // Projects
   createProject(project: InsertProject): Promise<Project>;
   getProject(id: number): Promise<Project | undefined>;
   updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
-  getAllProjects(): Promise<Project[]>;
+  getAllProjects(userId?: string): Promise<Project[]>;
   
   // Conversion jobs
   createConversionJob(job: InsertConversionJob): Promise<ConversionJob>;
@@ -25,6 +30,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<string, User>;
   private projects: Map<number, Project>;
   private conversionJobs: Map<number, ConversionJob>;
   private textureFiles: Map<number, TextureFile>;
@@ -34,6 +40,7 @@ export class MemStorage implements IStorage {
   private currentFileId: number;
 
   constructor() {
+    this.users = new Map();
     this.projects = new Map();
     this.conversionJobs = new Map();
     this.textureFiles = new Map();
@@ -49,6 +56,45 @@ export class MemStorage implements IStorage {
     this.processingStatus.clear();
     this.currentJobId = 1;
     this.currentFileId = 1;
+  }
+
+  // User methods
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByDiscordId(discordId: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.discordId === discordId) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async upsertUserByDiscordId(userData: Omit<UpsertUser, 'id'>): Promise<User> {
+    const existingUser = await this.getUserByDiscordId(userData.discordId!);
+    
+    if (existingUser) {
+      const updatedUser = {
+        ...existingUser,
+        ...userData,
+        updatedAt: new Date(),
+      };
+      this.users.set(existingUser.id, updatedUser);
+      return updatedUser;
+    }
+    
+    const id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newUser: User = {
+      id,
+      ...userData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as User;
+    
+    this.users.set(id, newUser);
+    return newUser;
   }
 
   // Project methods
@@ -88,8 +134,14 @@ export class MemStorage implements IStorage {
     return this.projects.delete(id);
   }
 
-  async getAllProjects(): Promise<Project[]> {
-    return Array.from(this.projects.values()).sort((a, b) => {
+  async getAllProjects(userId?: string): Promise<Project[]> {
+    let projectList = Array.from(this.projects.values());
+    
+    if (userId) {
+      projectList = projectList.filter(p => p.userId === userId);
+    }
+    
+    return projectList.sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;

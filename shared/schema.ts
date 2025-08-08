@@ -1,10 +1,35 @@
-import { pgTable, text, serial, integer, boolean, json, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, json, timestamp, varchar, index, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations, sql } from "drizzle-orm";
+
+// Session storage table for authentication
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Users table
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  discordId: varchar("discord_id").unique(),
+  username: varchar("username").notNull(),
+  discriminator: varchar("discriminator"),
+  email: varchar("email").unique(),
+  avatar: varchar("avatar"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 // Projects table
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
   name: text("name").notNull(),
   description: text("description"),
   status: text("status").notNull().default('active'),
@@ -46,6 +71,16 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
+
+// User schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type UpsertUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
 
 export const insertConversionJobSchema = createInsertSchema(conversionJobs).pick({
   filename: true,
