@@ -190,7 +190,7 @@ export default function DocsPage() {
                 <Info className="h-6 w-6 text-blue-400" />
                 What is LabPBR?
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm text-[#9e8f85]">
                 LabPBR (Physically Based Rendering for Labs) is a material format specification designed for Minecraft resource packs.
               </CardDescription>
             </CardHeader>
