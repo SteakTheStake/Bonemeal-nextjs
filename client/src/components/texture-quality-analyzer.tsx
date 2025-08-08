@@ -113,6 +113,8 @@ export default function TextureQualityAnalyzer() {
     // Color depth and detail analysis
     let detailScore = 75; // Default middle score
     let colorVarianceScore = 75;
+    let emissionScore = 100; // Default good score
+    let emissionAnalysis = "No emission data";
     
     if (ctx) {
       const imageData = ctx.getImageData(0, 0, Math.min(width, 256), Math.min(height, 256));
@@ -150,6 +152,33 @@ export default function TextureQualityAnalyzer() {
         if (Math.abs(current - next) > 20) edgeCount++;
       }
       detailScore = Math.min(100, (edgeCount / (pixelCount / 100)) * 100);
+
+      // Emission analysis (alpha channel)
+      if (pixels.length > 0 && pixels.length % 4 === 0) { // Has alpha channel
+        let emissionValues = [];
+        let has255Count = 0;
+        for (let i = 3; i < pixels.length; i += 4) {
+          const emission = pixels[i];
+          emissionValues.push(emission);
+          if (emission === 255) has255Count++;
+        }
+        
+        const emission255Ratio = has255Count / emissionValues.length;
+        
+        if (emission255Ratio > 0.95) {
+          // Most pixels are 255 - intentionally disabled emission
+          emissionScore = 100;
+          emissionAnalysis = "Emission disabled (intentional)";
+        } else if (emission255Ratio > 0.5) {
+          // Mixed emission values
+          emissionScore = 90;
+          emissionAnalysis = "Mixed emission values";
+        } else {
+          // Active emission texture
+          emissionScore = 95;
+          emissionAnalysis = "Active emission detected";
+        }
+      }
     }
 
     // Format analysis
@@ -201,6 +230,13 @@ export default function TextureQualityAnalyzer() {
         status: tilingScore >= 80 ? 'excellent' : tilingScore >= 60 ? 'good' : tilingScore >= 40 ? 'fair' : 'poor',
         description: "Seamless pattern analysis",
         recommendation: tilingScore < 70 ? "Check edges for seamless tiling" : undefined
+      },
+      {
+        name: "Emission Handling",
+        score: emissionScore,
+        status: emissionScore >= 95 ? 'excellent' : emissionScore >= 85 ? 'good' : emissionScore >= 70 ? 'fair' : 'poor',
+        description: emissionAnalysis,
+        recommendation: emissionScore < 90 && emissionAnalysis.includes("Mixed") ? "Consider consistent emission usage across texture" : undefined
       }
     ];
 

@@ -146,20 +146,26 @@ export class LabPBRConverter {
 
     // Check alpha channel (emission)
     if (channels >= 4) {
+      let hasEmission255 = false;
       for (let i = 0; i < pixelCount; i++) {
         const pixelOffset = i * channels;
         const emission = data[pixelOffset + 3]; // Alpha channel
         
         if (emission === 255) {
-          issues.push({
-            level: 'error',
-            message: 'Emission value of 255 will be ignored',
-            suggestion: 'Use emission values 0-254, where 254 is 100% emissive',
-            channel: 'alpha',
-            value: emission
-          });
+          hasEmission255 = true;
           break;
         }
+      }
+      
+      // If emission is 255, it's intentionally disabled - not an error
+      if (hasEmission255) {
+        issues.push({
+          level: 'info',
+          message: 'Emission disabled (value 255 detected)',
+          suggestion: 'Emission value 255 indicates intentionally disabled emission - this is correct for non-emissive materials',
+          channel: 'alpha',
+          value: 255
+        });
       }
     }
   }

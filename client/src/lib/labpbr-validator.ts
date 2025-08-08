@@ -40,10 +40,11 @@ export class LabPBRValidator {
       // Validate alpha channel (emission)
       if (a === 255) {
         issues.push({
-          level: 'error',
-          message: 'Emission value 255 will be ignored',
+          level: 'info',
+          message: 'Emission disabled (value 255 detected)',
           channel: 'alpha',
-          value: a
+          value: a,
+          suggestion: 'Emission value 255 indicates intentionally disabled emission - this is correct for non-emissive materials'
         });
       }
     }
