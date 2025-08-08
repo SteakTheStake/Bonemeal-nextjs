@@ -46,8 +46,8 @@ export function PhysicsWaterSystem() {
   const GRAVITY = new THREE.Vector3(0, -0.004, 0); // Stronger gravity
   const WIND = new THREE.Vector3(0.001 * (Math.random() - 0.5), 0, 0); // Stronger random wind
   const SURFACE_TENSION = 0.85;
-  const PARTICLE_LIMIT = 180; // More particles for dramatic effect
-  const SPLASH_PARTICLES = 12; // More particles per splash
+  const PARTICLE_LIMIT = 40; // Reduced for performance
+  const SPLASH_PARTICLES = 4; // Fewer splash particles
   
   const updateUIBoundaries = useCallback(() => {
     const boundaries: UIBoundary[] = [];
@@ -81,7 +81,6 @@ export function PhysicsWaterSystem() {
     });
     
     boundariesRef.current = boundaries;
-    console.log(`Updated UI boundaries: ${boundaries.length} elements detected`);
   }, []);
 
   const checkCollisionWithUI = useCallback((particle: WaterParticle, scene: THREE.Scene): { collision: boolean; createSplash: boolean } => {
@@ -92,10 +91,7 @@ export function PhysicsWaterSystem() {
       if (pos.x >= boundary.left && pos.x <= boundary.right &&
           pos.y <= boundary.top && pos.y >= boundary.bottom) {
         
-        // Debug collision detection
-        if (Math.random() < 0.01) { // Occasional debug log
-          console.log(`Collision detected at (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}) with boundary`, boundary);
-        }
+        // Removed debug logging for performance
         
         // Create splash on impact with UI elements
         if (!particle.onSurface && particle.velocity.y < -0.002) {
@@ -147,7 +143,7 @@ export function PhysicsWaterSystem() {
     customVelocity?: THREE.Vector3
   ): WaterParticle => {
     const size = isDroplet ? (0.04 + Math.random() * 0.06) : (0.02 + Math.random() * 0.03); // Larger droplets
-    const dropGeometry = new THREE.SphereGeometry(size, 8, 8);
+    const dropGeometry = new THREE.SphereGeometry(size, 6, 6); // Fewer segments for performance
     // Enhanced water color visibility for light mode on homepage
     const isHomepage = window.location.pathname === '/';
     const hue = 0.55 + Math.random() * 0.1; // Blue range
@@ -207,7 +203,7 @@ export function PhysicsWaterSystem() {
     
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Performance optimization
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Reduced pixel ratio for performance
     mountRef.current.appendChild(renderer.domElement);
 
     sceneRef.current = scene;
@@ -215,9 +211,9 @@ export function PhysicsWaterSystem() {
 
     camera.position.z = 5;
 
-    // Initialize particles - more on home page
+    // Initialize particles - fewer for performance
     const particles: WaterParticle[] = [];
-    const particleCount = window.location.pathname === '/' ? 80 : 40; // More water on home page
+    const particleCount = window.location.pathname === '/' ? 25 : 15; // Reduced initial particles
     for (let i = 0; i < particleCount; i++) {
       const particle = createParticle();
       scene.add(particle.mesh);
@@ -238,8 +234,8 @@ export function PhysicsWaterSystem() {
     };
     window.addEventListener('resize', resizeHandler);
 
-    // More frequent boundary updates for dynamic content and comprehensive UI detection
-    const boundaryUpdateInterval = setInterval(updateUIBoundaries, 1000); // Update every second
+    // Less frequent boundary updates for performance
+    const boundaryUpdateInterval = setInterval(updateUIBoundaries, 3000); // Update every 3 seconds
 
     let lastTime = performance.now();
     let frameCount = 0;
@@ -252,8 +248,8 @@ export function PhysicsWaterSystem() {
       lastTime = currentTime;
       frameCount++;
       
-      // Skip frames if performance is poor
-      if (deltaTime > 32 && frameCount % 2 === 0) return;
+      // Skip frames if performance is poor - more aggressive
+      if (deltaTime > 24 && frameCount % 2 === 0) return;
 
       const particles = particlesRef.current;
       
@@ -321,11 +317,11 @@ export function PhysicsWaterSystem() {
         }
       });
 
-      // Much more frequent and random particle spawning on home page
-      const spawnRate = window.location.pathname === '/' ? 0.08 : 0.03; // Double spawn rate
+      // Reduced particle spawning for better performance
+      const spawnRate = window.location.pathname === '/' ? 0.03 : 0.01; // Reduced spawn rate
       if (Math.random() < spawnRate && particles.length < PARTICLE_LIMIT) {
-        // Create burst spawning occasionally for dramatic effect
-        const burstCount = Math.random() < 0.1 ? 3 + Math.floor(Math.random() * 3) : 1;
+        // Smaller burst spawning for performance
+        const burstCount = Math.random() < 0.05 ? 2 : 1;
         
         for (let i = 0; i < burstCount && particles.length < PARTICLE_LIMIT; i++) {
           const aspectRatio = window.innerWidth / window.innerHeight;
