@@ -1,9 +1,14 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
 import { insertConversionJobSchema, type ConversionSettings, type ProcessingStatus } from "@shared/schema";
+
+// Extend Express Request interface for multer
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 import { TextureProcessor } from "./services/texture-processor";
 import { LabPBRConverter } from "./services/labpbr-converter";
 import { ZipHandler } from "./services/zip-handler";
@@ -68,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload and process files
-  app.post("/api/upload", upload.single("file"), async (req, res) => {
+  app.post("/api/upload", upload.single("file"), async (req: MulterRequest, res) => {
     try {
       console.log('Upload request received');
       console.log('File:', req.file ? {
@@ -183,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Validate textures
-  app.post("/api/validate", upload.single("file"), async (req, res) => {
+  app.post("/api/validate", upload.single("file"), async (req: MulterRequest, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -199,13 +204,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const extractedFiles = await zipHandler.extractResourcePack(req.file.buffer);
         console.log('Extracted files:', extractedFiles.length);
         
-        const validationResults = {
+        const validationResults: any = {
           isValid: true,
-          issues: [],
+          issues: [] as any[],
           version: "1.0.0",
           totalFiles: extractedFiles.length,
           textureFiles: extractedFiles.filter(f => f.isTexture).length,
-          fileDetails: []
+          fileDetails: [] as any[]
         };
 
         // Validate each texture file
@@ -232,11 +237,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (!validation.isValid) {
                 validationResults.isValid = false;
               }
-            } catch (error) {
+            } catch (error: any) {
               console.error('Error validating texture:', file.name, error);
               validationResults.issues.push({
                 level: 'error',
-                message: `Failed to validate texture: ${error.message}`,
+                message: `Failed to validate texture: ${error?.message || 'Unknown error'}`,
                 filename: file.name,
                 path: file.path
               });

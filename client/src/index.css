@@ -3,39 +3,39 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(50, 20%, 92%);
-  --foreground: hsl(280, 15%, 20%);
-  --muted: hsl(45, 15%, 85%);
-  --muted-foreground: hsl(280, 12%, 45%);
-  --popover: hsl(48, 25%, 95%);
-  --popover-foreground: hsl(280, 15%, 20%);
-  --card: hsl(48, 25%, 95%);
-  --card-foreground: hsl(280, 15%, 20%);
-  --border: hsl(45, 20%, 75%);
-  --input: hsl(45, 15%, 90%);
-  --primary: hsl(120, 40%, 45%);
-  --primary-foreground: hsl(48, 25%, 95%);
-  --secondary: hsl(45, 15%, 80%);
-  --secondary-foreground: hsl(280, 15%, 25%);
-  --accent: hsl(270, 30%, 65%);
-  --accent-foreground: hsl(48, 25%, 95%);
-  --destructive: hsl(0, 45%, 55%);
-  --destructive-foreground: hsl(48, 25%, 95%);
-  --ring: hsl(120, 40%, 45%);
+  --background: hsl(50, 15%, 82%);
+  --foreground: hsl(280, 15%, 25%);
+  --muted: hsl(45, 12%, 72%);
+  --muted-foreground: hsl(280, 12%, 40%);
+  --popover: hsl(48, 20%, 85%);
+  --popover-foreground: hsl(280, 15%, 25%);
+  --card: hsl(48, 20%, 85%);
+  --card-foreground: hsl(280, 15%, 25%);
+  --border: hsl(45, 15%, 65%);
+  --input: hsl(45, 12%, 78%);
+  --primary: hsl(120, 30%, 50%);
+  --primary-foreground: hsl(48, 20%, 90%);
+  --secondary: hsl(45, 12%, 70%);
+  --secondary-foreground: hsl(280, 15%, 30%);
+  --accent: hsl(270, 25%, 60%);
+  --accent-foreground: hsl(48, 20%, 90%);
+  --destructive: hsl(0, 40%, 50%);
+  --destructive-foreground: hsl(48, 20%, 90%);
+  --ring: hsl(120, 30%, 50%);
   --radius: 0.5rem;
   
-  /* Custom organic colors for Bonemeal - bright chalky tones */
-  --surface: hsl(48, 20%, 88%);
-  --elevated: hsl(48, 25%, 92%);
-  --success: hsl(120, 45%, 50%);
-  --warning: hsl(45, 70%, 55%);
-  --error: hsl(0, 55%, 55%);
-  --growth: hsl(120, 50%, 55%);
-  --earth: hsl(30, 35%, 70%);
-  --bloom: hsl(270, 40%, 75%);
-  --moss: hsl(85, 25%, 75%);
-  --vine: hsl(95, 30%, 65%);
-  --chalk: hsl(50, 25%, 95%);
+  /* Custom organic colors for Bonemeal - mid-tone earth colors */
+  --surface: hsl(48, 15%, 75%);
+  --elevated: hsl(48, 18%, 78%);
+  --success: hsl(120, 35%, 50%);
+  --warning: hsl(45, 50%, 50%);
+  --error: hsl(0, 45%, 50%);
+  --growth: hsl(120, 40%, 50%);
+  --earth: hsl(30, 25%, 60%);
+  --bloom: hsl(270, 30%, 65%);
+  --moss: hsl(85, 20%, 65%);
+  --vine: hsl(95, 25%, 55%);
+  --chalk: hsl(50, 20%, 80%);
 }
 
 @layer base {

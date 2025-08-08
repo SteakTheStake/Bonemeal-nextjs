@@ -9,6 +9,7 @@ import { AdvancedProcessing } from "@/components/advanced-processing";
 import { ProgressPanel } from "@/components/progress-panel";
 import { ValidationPanel } from "@/components/validation-panel";
 import { BatchPanel } from "@/components/batch-panel";
+import { FilesPanel } from "@/components/files-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -16,6 +17,8 @@ import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002
 export default function Converter() {
   const [activeJob, setActiveJob] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("progress");
+  const [validationResults, setValidationResults] = useState<any>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   const { data: jobs } = useQuery<ConversionJob[]>({
     queryKey: ["/api/jobs"],
@@ -123,7 +126,16 @@ export default function Converter() {
         {/* Main Workspace */}
         <main className="flex-1 flex flex-col">
           {!activeJob ? (
-            <UploadZone onJobCreated={setActiveJob} />
+            <UploadZone 
+              onJobCreated={setActiveJob}
+              onValidationStart={() => setIsValidating(true)}
+              onValidationComplete={(results) => {
+                setValidationResults(results);
+                setIsValidating(false);
+                setActiveTab("files");
+              }}
+              onValidationError={() => setIsValidating(false)}
+            />
           ) : (
             <TexturePreview 
               job={job}
@@ -137,7 +149,7 @@ export default function Converter() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-3 glass-card moss-texture">
               <TabsTrigger value="progress" className="grow-button">🌿 Progress</TabsTrigger>
-              <TabsTrigger value="validation" className="grow-button">✨ Validation</TabsTrigger>
+              <TabsTrigger value="files" className="grow-button">📁 Files</TabsTrigger>
               <TabsTrigger value="batch" className="grow-button">🎯 Batch</TabsTrigger>
             </TabsList>
             
@@ -148,10 +160,11 @@ export default function Converter() {
               />
             </TabsContent>
             
-            <TabsContent value="validation" className="flex-1 overflow-y-auto">
-              <ValidationPanel 
-                job={job}
-                textureFiles={textureFiles}
+            <TabsContent value="files" className="flex-1 overflow-y-auto">
+              <FilesPanel 
+                selectedJob={job}
+                validationResults={validationResults}
+                isValidating={isValidating}
               />
             </TabsContent>
             

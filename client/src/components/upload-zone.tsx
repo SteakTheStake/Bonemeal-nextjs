@@ -7,9 +7,12 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface UploadZoneProps {
   onJobCreated: (jobId: number) => void;
+  onValidationStart?: () => void;
+  onValidationComplete?: (results: any) => void;
+  onValidationError?: () => void;
 }
 
-export function UploadZone({ onJobCreated }: UploadZoneProps) {
+export function UploadZone({ onJobCreated, onValidationStart, onValidationComplete, onValidationError }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -17,6 +20,7 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
   const validateMutation = useMutation({
     mutationFn: async (file: File) => {
       console.log('Validating file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      onValidationStart?.();
       
       const formData = new FormData();
       formData.append("file", file);
@@ -36,9 +40,10 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
     onSuccess: (data) => {
       toast({
         title: "Validation complete",
-        description: `Found ${data.issues?.length || 0} issues. Check the validation panel for details.`,
+        description: `Found ${data.issues?.length || 0} issues. Check the files panel for details.`,
       });
       console.log('Validation result:', data);
+      onValidationComplete?.(data);
     },
     onError: (error) => {
       toast({
@@ -46,6 +51,7 @@ export function UploadZone({ onJobCreated }: UploadZoneProps) {
         description: error.message,
         variant: "destructive",
       });
+      onValidationError?.();
     },
   });
 
