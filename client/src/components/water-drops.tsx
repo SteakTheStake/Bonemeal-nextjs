@@ -52,14 +52,14 @@ export function PhysicsWaterSystem() {
   const updateUIBoundaries = useCallback(() => {
     const boundaries: UIBoundary[] = [];
     
-    // Find UI components that water should flow off
+    // Find ALL UI components that water should flow off - comprehensive selection
     const uiElements = document.querySelectorAll(
-      '.card, .bg-card, .border, .rounded-lg, .navbar, .header, .sidebar, .panel, .button, .input'
+      '.card, .bg-card, .border, .rounded, .rounded-lg, .rounded-md, .rounded-sm, .navbar, .header, .sidebar, .panel, .button, .input, .bg-background, .bg-muted, .bg-popover, .bg-primary, .bg-secondary, .bg-accent, .shadow, .shadow-md, .shadow-lg, .backdrop-blur, [class*="bg-"], [class*="border"], [class*="rounded"], [class*="shadow"], nav, header, main, aside, footer, section, article'
     );
     
     uiElements.forEach(element => {
       const rect = element.getBoundingClientRect();
-      if (rect.width > 50 && rect.height > 30) { // Skip tiny elements
+      if (rect.width > 20 && rect.height > 20) { // Include smaller elements for more collision
         boundaries.push({
           top: rect.top / window.innerHeight * 20 - 10, // Convert to 3D space
           bottom: rect.bottom / window.innerHeight * 20 - 10,
@@ -132,10 +132,16 @@ export function PhysicsWaterSystem() {
   ): WaterParticle => {
     const size = isDroplet ? (0.04 + Math.random() * 0.06) : (0.02 + Math.random() * 0.03); // Larger droplets
     const dropGeometry = new THREE.SphereGeometry(size, 8, 8);
+    // Enhanced water color visibility for light mode on homepage
+    const isHomepage = window.location.pathname === '/';
+    const hue = 0.55 + Math.random() * 0.1; // Blue range
+    const saturation = isHomepage ? 1.0 : 0.9; // More saturated on homepage
+    const lightness = isHomepage ? 0.6 : 0.75; // Darker blue on homepage for better visibility
+    
     const dropMaterial = new THREE.MeshBasicMaterial({ 
-      color: new THREE.Color().setHSL(0.55 + Math.random() * 0.1, 0.9, 0.75),
+      color: new THREE.Color().setHSL(hue, saturation, lightness),
       transparent: true, 
-      opacity: isDroplet ? 0.98 : 0.85 // Higher opacity for main droplets
+      opacity: isDroplet ? 0.98 : 0.85
     });
 
     const mesh = new THREE.Mesh(dropGeometry, dropMaterial);
@@ -209,8 +215,8 @@ export function PhysicsWaterSystem() {
     };
     window.addEventListener('resize', resizeHandler);
 
-    // Periodic boundary updates for dynamic content
-    const boundaryUpdateInterval = setInterval(updateUIBoundaries, 2000);
+    // More frequent boundary updates for dynamic content and comprehensive UI detection
+    const boundaryUpdateInterval = setInterval(updateUIBoundaries, 1000); // Update every second
 
     let lastTime = performance.now();
     let frameCount = 0;
@@ -343,8 +349,10 @@ export function PhysicsWaterSystem() {
       style={{ 
         zIndex: 9999, // Front of blur backgrounds for clear viewing
         mixBlendMode: window.location.pathname === '/' ? 'normal' : 'multiply',
-        filter: window.location.pathname === '/' ? 'contrast(1.3) brightness(1.2) drop-shadow(0 0 4px rgba(135,206,235,0.8)) saturate(1.2)' : 'contrast(1.1) brightness(0.9)',
-        opacity: window.location.pathname === '/' ? 1 : 0.85
+        filter: window.location.pathname === '/' 
+          ? 'contrast(1.4) brightness(1.3) drop-shadow(0 0 5px rgba(135,206,235,0.9)) saturate(1.3)' 
+          : 'blur(1px) contrast(0.8) brightness(0.7) opacity(0.4)', // Blurred on other pages to avoid distraction
+        opacity: window.location.pathname === '/' ? 1 : 0.6 // More subtle on other pages
       }}
     />
   );
@@ -406,7 +414,7 @@ export function MinecraftFarmlandFooter() {
           return (
             <div
               key={`plant-${i}`}
-              className="absolute animate-bounce"
+              className="absolute"
               style={{
                 backgroundImage: `url('${plantImage}')`,
                 backgroundRepeat: 'no-repeat',
