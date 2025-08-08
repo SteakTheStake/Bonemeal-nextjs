@@ -12,7 +12,7 @@ import { ProgressPanel } from "@/components/progress-panel";
 import { ValidationPanel } from "@/components/validation-panel";
 import { BatchPanel } from "@/components/batch-panel";
 import { FilesPanel } from "@/components/files-panel";
-import ProjectDashboard from "@/components/project-dashboard";
+import EnhancedProjectDashboard from "@/components/enhanced-project-dashboard";
 import TextureEditor from "@/components/texture-editor";
 import AITextureGenerator from "@/components/ai-texture-generator";
 import TemplateLibrary from "@/components/template-library";
@@ -170,7 +170,7 @@ export default function Greenhouse() {
 
           {mainView === 'dashboard' && (
             <div className="flex-1 p-4 overflow-auto">
-              <ProjectDashboard />
+              <EnhancedProjectDashboard />
             </div>
           )}
 
