@@ -2,8 +2,20 @@ import { pgTable, text, serial, integer, boolean, json, timestamp } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Projects table
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default('active'),
+  textureCount: integer("texture_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const conversionJobs = pgTable("conversion_jobs", {
   id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id),
   filename: text("filename").notNull(),
   status: text("status").notNull(), // 'pending', 'processing', 'completed', 'failed'
   progress: integer("progress").default(0),
