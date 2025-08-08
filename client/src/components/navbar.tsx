@@ -11,6 +11,8 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { User, LogOut, Home, Folder, Wrench, BookOpen, FileText } from "lucide-react";
 
+import SkyBlock_items_enchanted_bonemeal_1752287919002 from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
+
 export function Navbar() {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -32,7 +34,7 @@ export function Navbar() {
             <Link href="/">
               <div className="flex items-center gap-3 cursor-pointer">
                 <img 
-                  src="@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif" 
+                  src={SkyBlock_items_enchanted_bonemeal_1752287919002} 
                   alt="Bonemeal" 
                   className="h-8 w-8 object-contain"
                 />
