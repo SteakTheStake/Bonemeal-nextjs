@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -38,7 +41,8 @@ import {
   Download,
   Upload,
   Layers,
-  Zap
+  Zap,
+  Plus
 } from "lucide-react";
 import { type Project, type ConversionJob } from "@shared/schema";
 import { format } from "date-fns";
@@ -82,16 +86,23 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Mock data - replace with real API calls
-  const mockProject: Project = {
-    id: 1,
-    name: "Medieval Resource Pack",
-    description: "Complete medieval themed texture pack with LabPBR support",
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date(),
-    userId: "user123"
-  };
+  // Fetch projects from API
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ["/api/projects"],
+    retry: false,
+  });
+
+  // Auto-select first project if none selected
+  useEffect(() => {
+    if (projects.length > 0 && !selectedProject) {
+      setSelectedProject(projects[0]);
+    }
+  }, [projects, selectedProject]);
+
+  // Use selected project or first project
+  const currentProject = selectedProject || projects[0];
 
   const mockFiles: ProjectFile[] = [
     {
@@ -204,8 +215,145 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  // Create Project Component
+  function CreateProjectButton({ onProjectCreated }: { onProjectCreated: (project: Project) => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const { toast } = useToast();
+
+    const createProjectMutation = useMutation({
+      mutationFn: async (data: { name: string; description: string }) => {
+        return apiRequest('/api/projects', { method: 'POST', body: data });
+      },
+      onSuccess: (newProject: Project) => {
+        toast({ title: "Project created successfully" });
+        setIsOpen(false);
+        setName('');
+        setDescription('');
+        onProjectCreated(newProject);
+      },
+      onError: (error) => {
+        toast({ 
+          title: "Failed to create project", 
+          description: error.message,
+          variant: "destructive" 
+        });
+      }
+    });
+
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Project
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Start a new texture conversion project to organize your LabPBR processing work.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Project Name</Label>
+              <Input
+                id="name"
+                placeholder="My Texture Pack"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Describe your project..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => createProjectMutation.mutate({ name, description })}
+              disabled={!name.trim() || createProjectMutation.isPending}
+            >
+              {createProjectMutation.isPending ? 'Creating...' : 'Create Project'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // If no projects exist, show empty state
+  if (!projectsLoading && projects.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card className="glass-card">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <FolderOpen className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Projects Yet</h3>
+            <p className="text-muted-foreground text-center mb-6">
+              Create your first texture conversion project to get started with LabPBR processing.
+            </p>
+            <CreateProjectButton onProjectCreated={(project) => {
+              queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+              setSelectedProject(project);
+            }} />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (projectsLoading || !currentProject) {
+    return (
+      <div className="space-y-6">
+        <Card className="glass-card">
+          <CardContent className="flex items-center justify-center py-12">
+            <Clock className="h-8 w-8 animate-spin text-primary mr-3" />
+            <span>Loading projects...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Project Selection */}
+      {projects.length > 1 && (
+        <Card className="glass-card">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium">Project:</span>
+              <select 
+                className="bg-background border border-border rounded px-3 py-1 text-sm"
+                value={selectedProject?.id || ''}
+                onChange={(e) => {
+                  const project = projects.find(p => p.id === parseInt(e.target.value));
+                  setSelectedProject(project || null);
+                }}
+              >
+                {projects.map(project => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Project Header */}
       <Card className="glass-card">
         <CardHeader>
@@ -213,13 +361,17 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
             <div>
               <CardTitle className="flex items-center gap-3 text-xl">
                 <FolderOpen className="h-6 w-6 text-primary" />
-                {mockProject.name}
+                {currentProject.name}
               </CardTitle>
               <CardDescription className="mt-2">
-                {mockProject.description}
+                {currentProject.description || "No description provided"}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
+              <CreateProjectButton onProjectCreated={(project) => {
+                queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+                setSelectedProject(project);
+              }} />
               <Button variant="outline" size="sm">
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Files
