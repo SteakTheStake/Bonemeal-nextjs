@@ -186,7 +186,7 @@ export default function DocsPage() {
         <TabsContent value="overview" className="space-y-8">
           <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3">
+              <CardTitle className="flex items-center gap-3 text-[#b8b8b8]">
                 <Info className="h-6 w-6 text-blue-400" />
                 What is LabPBR?
               </CardTitle>
