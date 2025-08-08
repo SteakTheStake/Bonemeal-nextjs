@@ -21,6 +21,7 @@ import {
   Copy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface GenerationPreset {
   name: string;
@@ -37,6 +38,8 @@ export default function AITextureGenerator() {
   const [seamless, setSeamless] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [negativePrompt, setNegativePrompt] = useState("");
+  const [seed, setSeed] = useState<number | null>(null);
   const { toast } = useToast();
 
   const presets: GenerationPreset[] = [
@@ -95,18 +98,36 @@ export default function AITextureGenerator() {
 
     setIsGenerating(true);
     
-    // Simulate AI generation
-    setTimeout(() => {
-      const mockImages = Array.from({ length: variations }, (_, i) => 
-        `/api/placeholder/${resolution}/${resolution}?text=AI+${i+1}`
-      );
-      setGeneratedImages(mockImages);
-      setIsGenerating(false);
+    try {
+      // Call the AI generation API
+      const response = await apiRequest('/api/ai/generate-texture', {
+        method: 'POST',
+        body: JSON.stringify({
+          prompt,
+          negativePrompt,
+          style,
+          resolution: parseInt(resolution),
+          variations,
+          seed: seed || Math.floor(Math.random() * 1000000)
+        })
+      });
+      
+      const data = await response.json();
+      setGeneratedImages(data.images || []);
       toast({ 
         title: "Textures generated!", 
         description: `Created ${variations} variation${variations > 1 ? 's' : ''}`
       });
-    }, 3000);
+    } catch (error) {
+      console.error('AI generation failed:', error);
+      toast({ 
+        title: "Generation failed", 
+        description: error instanceof Error ? error.message : 'Please check your AI server settings',
+        variant: "destructive" 
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const applyPreset = (preset: GenerationPreset) => {

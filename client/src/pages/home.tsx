@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +40,13 @@ export default function Home() {
     }
   ];
 
-  const stats = [
+  // Fetch real statistics from API  
+  const { data: globalStats } = useQuery({
+    queryKey: ["/api/stats/global"],
+    retry: false,
+  });
+
+  const stats = globalStats?.formats || [
     { label: "Texture Formats", value: "5+", description: "PNG, JPG, TIFF, TGA, ZIP" },
     { label: "Processing Speed", value: "< 2s", description: "Per texture average" },
     { label: "Max File Size", value: "200MB", description: "Resource pack limit" },

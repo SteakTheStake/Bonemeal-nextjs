@@ -57,53 +57,28 @@ export function TexturePreview({ job, textureFiles }: TexturePreviewProps) {
             </div>
           ) : job.status === 'completed' ? (
             <div className="grid grid-cols-3 gap-4 h-full">
-              {/* Original */}
-              <div className="surface rounded-lg overflow-hidden">
-                <div className="bg-muted px-3 py-2 text-xs font-medium">Original</div>
-                <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                  Original Image
+              {job.textureFiles?.map((file: any, index: number) => (
+                <div key={index} className="surface rounded-lg overflow-hidden">
+                  <div className="bg-muted px-3 py-2 text-xs font-medium">
+                    {file.originalPath || `File ${index + 1}`}
+                  </div>
+                  <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+                    {file.preview ? (
+                      <img 
+                        src={file.preview} 
+                        alt={file.originalPath} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-muted-foreground text-xs">Processing...</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              {/* Base Color */}
-              <div className="surface rounded-lg overflow-hidden">
-                <div className="bg-muted px-3 py-2 text-xs font-medium">Base Color</div>
-                <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                  Generated
+              )) || (
+                <div className="col-span-3 text-center py-8">
+                  <p className="text-muted-foreground">No texture files found</p>
                 </div>
-              </div>
-
-              {/* Roughness */}
-              <div className="surface rounded-lg overflow-hidden">
-                <div className="bg-muted px-3 py-2 text-xs font-medium">Roughness</div>
-                <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                  Generated
-                </div>
-              </div>
-
-              {/* Normal Map */}
-              <div className="surface rounded-lg overflow-hidden">
-                <div className="bg-muted px-3 py-2 text-xs font-medium">Normal Map</div>
-                <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                  Generated
-                </div>
-              </div>
-
-              {/* Height Map */}
-              <div className="surface rounded-lg overflow-hidden">
-                <div className="bg-muted px-3 py-2 text-xs font-medium">Height Map</div>
-                <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                  Generated
-                </div>
-              </div>
-
-              {/* AO */}
-              <div className="surface rounded-lg overflow-hidden">
-                <div className="bg-muted px-3 py-2 text-xs font-medium">Ambient Occlusion</div>
-                <div className="aspect-square bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                  Generated
-                </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">

@@ -52,25 +52,40 @@ export default function ProjectDashboard({ projectId }: { projectId?: number }) 
   const [sortBy, setSortBy] = useState('name');
 
   // Mock data - will be replaced with real API calls
-  const mockTextures: TextureItem[] = Array.from({ length: 12 }, (_, i) => ({
-    id: `texture-${i}`,
-    name: `texture_${i + 1}.png`,
-    type: ['base', 'normal', 'specular'][i % 3],
-    status: ['completed', 'processing', 'pending', 'failed'][i % 4] as any,
-    preview: '/api/placeholder/64/64',
-    size: Math.floor(Math.random() * 1000) + 100,
-    resolution: ['16x16', '32x32', '64x64', '128x128'][i % 4],
-    lastModified: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-    validationScore: Math.floor(Math.random() * 30) + 70
-  }));
+  // Fetch project data from API
+  const { data: projects = [] } = useQuery({
+    queryKey: ["/api/projects"],
+    retry: false,
+  });
+
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["/api/jobs"],
+    retry: false,
+  });
+
+  // Calculate real statistics from actual data
+  const textures: TextureItem[] = jobs.flatMap((job: any) => 
+    (job.textureFiles || []).map((file: any) => ({
+      id: file.id || Math.random().toString(),
+      name: file.originalPath || 'Unknown',
+      type: file.originalPath?.includes('_n.') ? 'normal' : 
+            file.originalPath?.includes('_s.') ? 'specular' : 'base',
+      status: job.status || 'pending',
+      preview: file.preview || '/api/placeholder/64/64',
+      size: file.size || 0,
+      resolution: `${file.width || 64}x${file.height || 64}`,
+      lastModified: new Date(job.updatedAt || Date.now()),
+      validationScore: file.validationScore || 0
+    }))
+  );
 
   const stats: ProjectStats = {
-    totalTextures: mockTextures.length,
-    completed: mockTextures.filter(t => t.status === 'completed').length,
-    processing: mockTextures.filter(t => t.status === 'processing').length,
-    failed: mockTextures.filter(t => t.status === 'failed').length,
+    totalTextures: textures.length,
+    completed: textures.filter(t => t.status === 'completed').length,
+    processing: textures.filter(t => t.status === 'processing').length,
+    failed: textures.filter(t => t.status === 'failed').length,
     averageProcessingTime: 2.3,
-    totalSize: mockTextures.reduce((sum, t) => sum + t.size, 0)
+    totalSize: textures.reduce((sum, t) => sum + t.size, 0)
   };
 
   const getStatusColor = (status: TextureItem['status']) => {
@@ -88,7 +103,7 @@ export default function ProjectDashboard({ projectId }: { projectId?: number }) 
     return 'text-red-500';
   };
 
-  const filteredTextures = mockTextures.filter(texture => {
+  const filteredTextures = textures.filter(texture => {
     const matchesSearch = texture.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterType === 'all' || texture.type === filterType;
     return matchesSearch && matchesFilter;

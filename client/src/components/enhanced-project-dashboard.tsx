@@ -104,88 +104,51 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
   // Use selected project or first project
   const currentProject = selectedProject || projects[0];
 
-  const mockFiles: ProjectFile[] = [
-    {
-      id: "1",
-      name: "textures",
-      path: "/textures",
-      type: "folder",
-      size: 0,
-      lastModified: new Date(),
-      status: "completed"
-    },
-    {
-      id: "2", 
-      name: "stone.png",
-      path: "/textures/blocks/stone.png",
-      type: "texture",
-      size: 45678,
-      lastModified: new Date(),
-      status: "completed",
-      preview: "/api/placeholder/64/64",
-      validationScore: 92
-    },
-    {
-      id: "3",
-      name: "stone_s.png", 
-      path: "/textures/blocks/stone_s.png",
-      type: "texture",
-      size: 34567,
-      lastModified: new Date(),
-      status: "error",
-      errorMessage: "Invalid specular channel format",
-      validationScore: 45
-    },
-    {
-      id: "4",
-      name: "wood.png",
-      path: "/textures/blocks/wood.png", 
-      type: "texture",
-      size: 67890,
-      lastModified: new Date(),
-      status: "processing",
-      validationScore: 78
-    }
-  ];
+  // Fetch project files
+  const { data: projectFiles = [] } = useQuery({
+    queryKey: ["/api/projects", currentProject?.id, "files"],
+    enabled: !!currentProject?.id,
+    retry: false,
+  });
 
-  const mockIssues: ValidationIssue[] = [
-    {
-      id: "1",
-      level: "error",
-      message: "Specular map has invalid metallic channel values",
-      file: "stone_s.png",
-      line: 1,
-      suggestion: "Use only 0 or 255 values for metallic channel (green)"
-    },
-    {
-      id: "2", 
-      level: "warning",
-      message: "Texture resolution is not power of 2",
-      file: "dirt.png",
-      suggestion: "Resize to 64x64, 128x128, or 256x256 for optimal performance"
-    },
-    {
-      id: "3",
-      level: "info", 
-      message: "Normal map uses DirectX format",
-      file: "stone_n.png",
-      suggestion: "Consider converting to OpenGL format for broader compatibility"
-    }
-  ];
+  // Fetch project validation issues
+  const { data: projectIssues = [] } = useQuery({
+    queryKey: ["/api/projects", currentProject?.id, "issues"],
+    enabled: !!currentProject?.id,
+    retry: false,
+  });
 
-  const mockStats: ProjectStats = {
-    totalFiles: 156,
-    completedFiles: 142,
-    errorFiles: 8,
-    processingFiles: 6,
-    totalSize: "23.4 MB",
-    averageScore: 87,
+  // Fetch project statistics
+  const { data: projectStats } = useQuery({
+    queryKey: ["/api/projects", currentProject?.id, "stats"],
+    enabled: !!currentProject?.id,
+    retry: false,
+  });
+
+  // Format file size utility function
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
+
+  // Calculate stats from files if API doesn't return them
+  const calculatedStats: ProjectStats = projectStats || {
+    totalFiles: projectFiles.length,
+    completedFiles: projectFiles.filter((f: any) => f.status === 'completed').length,
+    errorFiles: projectFiles.filter((f: any) => f.status === 'error').length,
+    processingFiles: projectFiles.filter((f: any) => f.status === 'processing').length,
+    totalSize: formatFileSize(projectFiles.reduce((sum: number, f: any) => sum + (f.size || 0), 0)),
+    averageScore: projectFiles.length > 0 ? 
+      Math.round(projectFiles.reduce((sum: number, f: any) => sum + (f.validationScore || 0), 0) / projectFiles.length) : 0,
     lastActivity: new Date()
   };
 
   const breadcrumbPaths = currentPath.split('/').filter(Boolean);
 
-  const filteredFiles = mockFiles.filter(file =>
+  const filteredFiles = projectFiles.filter((file: any) =>
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -205,14 +168,6 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
       case 'info': return <Info className="h-4 w-4 text-blue-400" />;
       default: return <Info className="h-4 w-4 text-gray-400" />;
     }
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
   // Create Project Component
@@ -397,7 +352,7 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
               <Database className="h-4 w-4 text-blue-400" />
               <span className="text-sm text-muted-foreground">Total Files</span>
             </div>
-            <div className="text-2xl font-bold text-foreground">{mockStats.totalFiles}</div>
+            <div className="text-2xl font-bold text-foreground">{calculatedStats.totalFiles}</div>
           </CardContent>
         </Card>
         <Card className="glass-card">
@@ -406,7 +361,7 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
               <CheckCircle className="h-4 w-4 text-green-400" />
               <span className="text-sm text-muted-foreground">Completed</span>
             </div>
-            <div className="text-2xl font-bold text-green-400">{mockStats.completedFiles}</div>
+            <div className="text-2xl font-bold text-green-400">{calculatedStats.completedFiles}</div>
           </CardContent>
         </Card>
         <Card className="glass-card">
@@ -415,7 +370,7 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
               <XCircle className="h-4 w-4 text-red-400" />
               <span className="text-sm text-muted-foreground">Errors</span>
             </div>
-            <div className="text-2xl font-bold text-red-400">{mockStats.errorFiles}</div>
+            <div className="text-2xl font-bold text-red-400">{calculatedStats.errorFiles}</div>
           </CardContent>
         </Card>
         <Card className="glass-card">
@@ -424,7 +379,7 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
               <Clock className="h-4 w-4 text-blue-400" />
               <span className="text-sm text-muted-foreground">Processing</span>
             </div>
-            <div className="text-2xl font-bold text-blue-400">{mockStats.processingFiles}</div>
+            <div className="text-2xl font-bold text-blue-400">{calculatedStats.processingFiles}</div>
           </CardContent>
         </Card>
         <Card className="glass-card">
@@ -433,7 +388,7 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
               <TrendingUp className="h-4 w-4 text-purple-400" />
               <span className="text-sm text-muted-foreground">Avg Score</span>
             </div>
-            <div className="text-2xl font-bold text-purple-400">{mockStats.averageScore}%</div>
+            <div className="text-2xl font-bold text-purple-400">{calculatedStats.averageScore}%</div>
           </CardContent>
         </Card>
         <Card className="glass-card">
@@ -442,7 +397,7 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
               <Activity className="h-4 w-4 text-orange-400" />
               <span className="text-sm text-muted-foreground">Total Size</span>
             </div>
-            <div className="text-2xl font-bold text-orange-400">{mockStats.totalSize}</div>
+            <div className="text-2xl font-bold text-orange-400">{calculatedStats.totalSize}</div>
           </CardContent>
         </Card>
       </div>
@@ -625,7 +580,12 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
             <CardContent>
               <ScrollArea className="h-96">
                 <div className="space-y-3">
-                  {mockIssues.map((issue) => (
+                  {projectIssues.length === 0 ? (
+                    <div className="text-center py-8">
+                      <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-3" />
+                      <p className="text-muted-foreground">No validation issues found</p>
+                    </div>
+                  ) : projectIssues.map((issue: any) => (
                     <Card key={issue.id} className="border-l-4 border-l-red-500">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
