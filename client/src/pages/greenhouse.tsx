@@ -7,6 +7,7 @@ import { UploadZone } from "@/components/upload-zone";
 import { TexturePreview } from "@/components/texture-preview";
 import { ConversionSettings } from "@/components/conversion-settings";
 import { AdvancedProcessing } from "@/components/advanced-processing";
+import { AdvancedInterpolation } from "@/components/advanced-interpolation";
 import { ProgressPanel } from "@/components/progress-panel";
 import { ValidationPanel } from "@/components/validation-panel";
 import { BatchPanel } from "@/components/batch-panel";
@@ -46,7 +47,7 @@ export default function Greenhouse() {
     refetchInterval: 1000,
   });
 
-  const { data: textureFiles } = useQuery({
+  const { data: textureFiles = [] } = useQuery({
     queryKey: ["/api/jobs", activeJob, "files"],
     enabled: !!activeJob,
     refetchInterval: 5000,

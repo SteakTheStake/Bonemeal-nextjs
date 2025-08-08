@@ -20,7 +20,11 @@ import {
   Code,
   Lightbulb,
   GitBranch,
-  Database
+  Database,
+  Brush,
+  Box,
+  Sparkles,
+  FolderOpen
 } from "lucide-react";
 
 export default function DocsPage() {
@@ -565,6 +569,181 @@ export default function DocsPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Reference Tab */}
+        <TabsContent value="reference" className="space-y-8">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-600 bg-clip-text text-transparent">
+              Essential Tools & Resources
+            </h2>
+            <p className="text-xl text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto">
+              Professional software and automation tools for creating high-quality LabPBR textures and streamlining your workflow.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* GIMP */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-4">
+                  <Brush className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">GIMP</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Free, open-source image editor with advanced texture editing capabilities and plugin support.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Professional-grade image editing with layer support, custom brushes, and extensive filter options perfect for texture creation and modification.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://www.gimp.org/downloads/" target="_blank" rel="noopener noreferrer">
+                    Download GIMP
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Substance Designer */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center mb-4">
+                  <Box className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">Substance Designer</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Node-based texture authoring tool for creating seamless, procedural materials.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Industry-standard tool for creating tileable textures with automatic PBR map generation and parametric controls.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://www.adobe.com/products/substance3d/apps/designer.html" target="_blank" rel="noopener noreferrer">
+                    View Designer
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Substance Painter */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-4">
+                  <Brush className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">Substance Painter</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  3D painting software for texturing models with real-time PBR preview.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Paint directly on 3D models with smart materials, procedural effects, and automatic PBR channel generation.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://www.adobe.com/products/substance3d/apps/painter.html" target="_blank" rel="noopener noreferrer">
+                    View Painter
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* PhotoGIMP */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-4">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">PhotoGIMP</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Photoshop-style interface mod for GIMP with familiar tools and workflows.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Transform GIMP into a Photoshop-like experience with familiar UI, shortcuts, and tool arrangements for easier transition.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://github.com/Diolinux/PhotoGIMP" target="_blank" rel="noopener noreferrer">
+                    Get PhotoGIMP
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Bulk Rename Utility */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-4">
+                  <FolderOpen className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">Bulk Rename Utility</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Powerful file renaming tool for organizing texture files with pattern matching.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Rename hundreds of texture files at once using regex patterns, perfect for organizing LabPBR texture sets.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://www.bulkrenameutility.co.uk/" target="_blank" rel="noopener noreferrer">
+                    Download Tool
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Substance Sampler */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mb-4">
+                  <Target className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">Substance Sampler</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Convert photos into seamless, tileable PBR materials using AI-powered analysis.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Turn real-world photos into high-quality PBR materials with automatic tiling and material extraction.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://www.adobe.com/products/substance3d/apps/sampler.html" target="_blank" rel="noopener noreferrer">
+                    View Sampler
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Python Automation */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm hover:scale-105 transition-transform">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-lg flex items-center justify-center mb-4">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-xl font-semibold text-foreground">Python Automation</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Automate texture processing with custom interpolation methods and batch operations.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground/80 text-sm mb-4">
+                  Script complex texture workflows including file renaming, resizing with specific pixel interpolations for different texture types, and batch processing.
+                </p>
+                <Button asChild className="w-full">
+                  <a href="https://www.geeksforgeeks.org/python/python-automation/" target="_blank" rel="noopener noreferrer">
+                    Learn Automation
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
