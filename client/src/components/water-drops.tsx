@@ -1,6 +1,17 @@
 import { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 
+// Import Minecraft textures
+import farmlandTexture from '@assets/farmland_1754685272635.png';
+import wetFarmlandTexture from '@assets/wet_farmland_1754685272635.png';
+import carrotsStage0 from '@assets/carrots_stage0_1754685345998.png';
+import largeFernTop from '@assets/large_fern_top_1754685345999.png';
+import dandelion2 from '@assets/dandelion_2_1754685345999.png';
+import oakSapling from '@assets/oak_sapling_1754685345999.png';
+import grass from '@assets/grass_1754685346000.png';
+import grass1 from '@assets/grass1_1754685346000.png';
+import allium from '@assets/allium_1754685346000.png';
+
 interface WaterParticle {
   mesh: THREE.Mesh;
   velocity: THREE.Vector3;
@@ -29,10 +40,10 @@ export function PhysicsWaterSystem() {
   const boundariesRef = useRef<UIBoundary[]>([]);
 
   // Physics constants
-  const GRAVITY = new THREE.Vector3(0, -0.0012, 0);
-  const WIND = new THREE.Vector3(0.0001, 0, 0);
-  const SURFACE_TENSION = 0.95;
-  const PARTICLE_LIMIT = 80; // Performance limit
+  const GRAVITY = new THREE.Vector3(0, -0.0015, 0);
+  const WIND = new THREE.Vector3(0.0002, 0, 0);
+  const SURFACE_TENSION = 0.92;
+  const PARTICLE_LIMIT = 120; // Increased for more visible water
   
   const updateUIBoundaries = useCallback(() => {
     const boundaries: UIBoundary[] = [];
@@ -84,11 +95,12 @@ export function PhysicsWaterSystem() {
   }, []);
 
   const createParticle = useCallback((x?: number, y?: number): WaterParticle => {
-    const dropGeometry = new THREE.SphereGeometry(0.02 + Math.random() * 0.03, 6, 6);
+    const size = 0.03 + Math.random() * 0.05; // Larger water droplets
+    const dropGeometry = new THREE.SphereGeometry(size, 8, 8);
     const dropMaterial = new THREE.MeshBasicMaterial({ 
-      color: new THREE.Color().setHSL(0.55 + Math.random() * 0.1, 0.7, 0.6),
+      color: new THREE.Color().setHSL(0.55 + Math.random() * 0.1, 0.8, 0.7),
       transparent: true, 
-      opacity: 0.8
+      opacity: 0.95 // Much more visible
     });
 
     const mesh = new THREE.Mesh(dropGeometry, dropMaterial);
@@ -101,14 +113,14 @@ export function PhysicsWaterSystem() {
     return {
       mesh,
       velocity: new THREE.Vector3(
-        (Math.random() - 0.5) * 0.002,
-        -0.001 - Math.random() * 0.003,
+        (Math.random() - 0.5) * 0.003,
+        -0.002 - Math.random() * 0.004, // Faster falling
         0
       ),
       acceleration: new THREE.Vector3(0, 0, 0),
       life: 1.0,
-      maxLife: 8000 + Math.random() * 5000,
-      size: 0.02 + Math.random() * 0.03,
+      maxLife: 10000 + Math.random() * 8000, // Longer lifespan
+      size,
       onSurface: false,
       surfaceTime: 0
     };
@@ -136,9 +148,10 @@ export function PhysicsWaterSystem() {
 
     camera.position.z = 5;
 
-    // Initialize particles
+    // Initialize particles - more on home page
     const particles: WaterParticle[] = [];
-    for (let i = 0; i < 40; i++) {
+    const particleCount = window.location.pathname === '/' ? 80 : 40; // More water on home page
+    for (let i = 0; i < particleCount; i++) {
       const particle = createParticle();
       scene.add(particle.mesh);
       particles.push(particle);
@@ -238,8 +251,9 @@ export function PhysicsWaterSystem() {
         }
       });
 
-      // Occasional new particles from various spawn points
-      if (Math.random() < 0.02 && particles.length < PARTICLE_LIMIT) {
+      // More frequent particle spawning on home page
+      const spawnRate = window.location.pathname === '/' ? 0.04 : 0.02;
+      if (Math.random() < spawnRate && particles.length < PARTICLE_LIMIT) {
         const newParticle = createParticle();
         scene.add(newParticle.mesh);
         particles.push(newParticle);
@@ -278,8 +292,9 @@ export function PhysicsWaterSystem() {
       ref={mountRef} 
       className="pointer-events-none fixed inset-0 z-10"
       style={{ 
-        mixBlendMode: 'multiply',
-        filter: 'contrast(1.1) brightness(0.9)'
+        mixBlendMode: window.location.pathname === '/' ? 'normal' : 'multiply',
+        filter: window.location.pathname === '/' ? 'contrast(1.2) brightness(1.1) drop-shadow(0 0 3px rgba(135,206,235,0.6))' : 'contrast(1.1) brightness(0.9)',
+        opacity: window.location.pathname === '/' ? 1 : 0.8
       }}
     />
   );
@@ -287,89 +302,85 @@ export function PhysicsWaterSystem() {
 
 // Minecraft Wet Farmland Footer Component
 export function MinecraftFarmlandFooter() {
+  const plantImages = [
+    carrotsStage0,
+    largeFernTop, 
+    dandelion2,
+    oakSapling,
+    grass,
+    grass1,
+    allium
+  ];
+
   return (
-    <footer className="relative w-full h-32 bg-gradient-to-t from-amber-900 via-amber-800 to-amber-700 overflow-hidden border-t-4 border-amber-600">
-      {/* Wet farmland texture pattern */}
+    <footer className="relative w-full h-32 overflow-hidden border-t-4 border-amber-600">
+      {/* Base farmland texture */}
       <div 
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `
-            radial-gradient(circle at 20% 30%, rgba(101, 67, 33, 0.8) 2px, transparent 2px),
-            radial-gradient(circle at 80% 70%, rgba(101, 67, 33, 0.8) 1px, transparent 1px),
-            linear-gradient(45deg, rgba(92, 64, 35, 0.3) 25%, transparent 25%),
-            linear-gradient(-45deg, rgba(92, 64, 35, 0.3) 25%, transparent 25%)
-          `,
-          backgroundSize: '8px 8px, 6px 6px, 4px 4px, 4px 4px',
-          backgroundPosition: '0 0, 0 0, 0 0, 2px 2px'
+          backgroundImage: `url('${farmlandTexture}')`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '64px 64px',
+          imageRendering: 'pixelated'
         }}
       />
       
-      {/* Water absorption areas */}
-      <div className="absolute inset-0">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-blue-900/20 animate-pulse"
-            style={{
-              width: `${8 + Math.random() * 16}px`,
-              height: `${4 + Math.random() * 8}px`,
-              left: `${Math.random() * 90}%`,
-              top: `${20 + Math.random() * 60}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Minecraft crop sprites */}
+      {/* Wet farmland overlay for water absorption areas */}
       <div className="absolute inset-0">
         {[...Array(8)].map((_, i) => (
           <div
-            key={i}
-            className="absolute"
+            key={`wet-${i}`}
+            className="absolute animate-pulse opacity-70"
             style={{
-              left: `${10 + i * 12}%`,
-              top: '10%',
-              width: '16px',
-              height: '24px'
-            }}
-          >
-            {/* Wheat crop sprite made with CSS */}
-            <div className="relative w-full h-full">
-              <div className="absolute bottom-0 w-2 h-3 bg-green-600 left-1/2 transform -translate-x-1/2" />
-              <div className="absolute bottom-2 w-3 h-2 bg-green-500 left-1/2 transform -translate-x-1/2" />
-              <div className="absolute bottom-3 w-4 h-3 bg-yellow-400 left-1/2 transform -translate-x-1/2 rounded-t" />
-              <div className="absolute top-0 w-1 h-2 bg-green-400 left-1/2 transform -translate-x-1/2" />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Soil texture details */}
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-900/10 via-transparent to-amber-900/10" />
-      
-      {/* Growth particles */}
-      <div className="absolute inset-0">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-green-400 rounded-full animate-bounce"
-            style={{
-              left: `${20 + i * 15}%`,
-              top: `${30 + Math.random() * 40}%`,
-              animationDelay: `${i * 0.5}s`,
-              animationDuration: '3s'
+              backgroundImage: `url('${wetFarmlandTexture}')`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '64px 64px',
+              imageRendering: 'pixelated',
+              width: '64px',
+              height: '64px',
+              left: `${Math.random() * 80}%`,
+              top: `${Math.random() * 50}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${3 + Math.random() * 2}s`
             }}
           />
         ))}
       </div>
 
+      {/* Growing plants scattered across the footer */}
+      <div className="absolute inset-0">
+        {[...Array(12)].map((_, i) => {
+          const plantImage = plantImages[Math.floor(Math.random() * plantImages.length)];
+          const scale = 0.8 + Math.random() * 0.6; // Random scale 0.8-1.4
+          
+          return (
+            <div
+              key={`plant-${i}`}
+              className="absolute animate-bounce"
+              style={{
+                backgroundImage: `url('${plantImage}')`,
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'contain',
+                imageRendering: 'pixelated',
+                width: `${20 * scale}px`,
+                height: `${20 * scale}px`,
+                left: `${5 + Math.random() * 85}%`,
+                top: `${10 + Math.random() * 60}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${4 + Math.random() * 3}s`,
+                transform: `scale(${scale})`,
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+              }}
+            />
+          );
+        })}
+      </div>
+
       {/* Footer content */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center text-amber-200/80">
-          <p className="text-sm font-medium mb-1">🌱 Growth happens here</p>
-          <p className="text-xs">Water nourishes the Bonemeal ecosystem</p>
+      <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/10">
+        <div className="text-center text-amber-100 drop-shadow-lg">
+          <p className="text-sm font-medium mb-1 text-shadow">Growth happens here</p>
+          <p className="text-xs text-amber-200/90">Water nourishes the Bonemeal ecosystem</p>
         </div>
       </div>
     </footer>
