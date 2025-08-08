@@ -57,20 +57,31 @@ export function PhysicsWaterSystem() {
       '.card, .bg-card, .border, .rounded, .rounded-lg, .rounded-md, .rounded-sm, .navbar, .header, .sidebar, .panel, .button, .input, .bg-background, .bg-muted, .bg-popover, .bg-primary, .bg-secondary, .bg-accent, .shadow, .shadow-md, .shadow-lg, .backdrop-blur, [class*="bg-"], [class*="border"], [class*="rounded"], [class*="shadow"], nav, header, main, aside, footer, section, article'
     );
     
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const worldWidth = 10 * aspectRatio;
+    const worldHeight = 10;
+    
     uiElements.forEach(element => {
       const rect = element.getBoundingClientRect();
       if (rect.width > 20 && rect.height > 20) { // Include smaller elements for more collision
+        // Correct coordinate transformation: screen to world space matching camera bounds
+        const left = (rect.left / window.innerWidth - 0.5) * worldWidth * 2;
+        const right = (rect.right / window.innerWidth - 0.5) * worldWidth * 2;
+        const top = (0.5 - rect.top / window.innerHeight) * worldHeight * 2;
+        const bottom = (0.5 - rect.bottom / window.innerHeight) * worldHeight * 2;
+        
         boundaries.push({
-          top: rect.top / window.innerHeight * 20 - 10, // Convert to 3D space
-          bottom: rect.bottom / window.innerHeight * 20 - 10,
-          left: rect.left / window.innerWidth * 20 - 10,
-          right: rect.right / window.innerWidth * 20 - 10,
+          top,
+          bottom,
+          left,
+          right,
           element
         });
       }
     });
     
     boundariesRef.current = boundaries;
+    console.log(`Updated UI boundaries: ${boundaries.length} elements detected`);
   }, []);
 
   const checkCollisionWithUI = useCallback((particle: WaterParticle, scene: THREE.Scene): { collision: boolean; createSplash: boolean } => {
@@ -79,7 +90,12 @@ export function PhysicsWaterSystem() {
     
     for (const boundary of boundariesRef.current) {
       if (pos.x >= boundary.left && pos.x <= boundary.right &&
-          pos.y >= boundary.bottom && pos.y <= boundary.top) {
+          pos.y <= boundary.top && pos.y >= boundary.bottom) {
+        
+        // Debug collision detection
+        if (Math.random() < 0.01) { // Occasional debug log
+          console.log(`Collision detected at (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}) with boundary`, boundary);
+        }
         
         // Create splash on impact with UI elements
         if (!particle.onSurface && particle.velocity.y < -0.002) {
@@ -145,10 +161,13 @@ export function PhysicsWaterSystem() {
     });
 
     const mesh = new THREE.Mesh(dropGeometry, dropMaterial);
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const worldWidth = 10 * aspectRatio;
+    
     mesh.position.set(
-      x ?? (Math.random() - 0.5) * 20, // Wider spawn area
-      y ?? 12 + Math.random() * 4,
-      (Math.random() - 0.5) * 3
+      x ?? (Math.random() - 0.5) * worldWidth * 1.8, // Match coordinate system
+      y ?? 8 + Math.random() * 2, // Spawn from top of screen
+      (Math.random() - 0.5) * 2
     );
 
     const velocity = customVelocity || new THREE.Vector3(
@@ -175,9 +194,11 @@ export function PhysicsWaterSystem() {
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // Scene setup
+    // Scene setup with proper aspect ratio
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 1000);
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const worldWidth = 10 * aspectRatio;
+    const camera = new THREE.OrthographicCamera(-worldWidth, worldWidth, 10, -10, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ 
       alpha: true, 
       antialias: false, // Performance optimization
@@ -209,8 +230,10 @@ export function PhysicsWaterSystem() {
     const resizeHandler = () => {
       updateUIBoundaries();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.left = -window.innerWidth / window.innerHeight * 10;
-      camera.right = window.innerWidth / window.innerHeight * 10;
+      const aspectRatio = window.innerWidth / window.innerHeight;
+      const worldWidth = 10 * aspectRatio;
+      camera.left = -worldWidth;
+      camera.right = worldWidth;
       camera.updateProjectionMatrix();
     };
     window.addEventListener('resize', resizeHandler);
@@ -305,9 +328,11 @@ export function PhysicsWaterSystem() {
         const burstCount = Math.random() < 0.1 ? 3 + Math.floor(Math.random() * 3) : 1;
         
         for (let i = 0; i < burstCount && particles.length < PARTICLE_LIMIT; i++) {
+          const aspectRatio = window.innerWidth / window.innerHeight;
+          const worldWidth = 10 * aspectRatio;
           const newParticle = createParticle(
-            (Math.random() - 0.5) * 22, // Wider spawn area
-            12 + Math.random() * 5 // Higher spawn height
+            (Math.random() - 0.5) * worldWidth * 1.6, // Spawn across screen width
+            8 + Math.random() * 2 // From top of camera bounds
           );
           scene.add(newParticle.mesh);
           particles.push(newParticle);
