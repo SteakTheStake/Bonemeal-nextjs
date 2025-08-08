@@ -10,11 +10,16 @@ import Home from "@/pages/home";
 import Projects from "@/pages/projects";
 import Greenhouse from "@/pages/greenhouse";
 import Docs from "@/pages/docs";
+import { useLocation } from "wouter";
 
 function Router() {
+  const [location] = useLocation();
+  const isHomepage = location === '/';
+  
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative flex flex-col">
-      <PhysicsWaterSystem />
+      {/* Only render water system on homepage for performance */}
+      {isHomepage && <PhysicsWaterSystem />}
       <div className="relative z-20 flex-1">
         <Navbar />
         <Switch>

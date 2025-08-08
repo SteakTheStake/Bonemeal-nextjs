@@ -41,13 +41,14 @@ export function PhysicsWaterSystem() {
   const frameRef = useRef<number>(0);
   const particlesRef = useRef<WaterParticle[]>([]);
   const boundariesRef = useRef<UIBoundary[]>([]);
+  const performanceDisabledRef = useRef<boolean>(false);
 
   // Physics constants - Enhanced for dramatic effects
   const GRAVITY = new THREE.Vector3(0, -0.004, 0); // Stronger gravity
   const WIND = new THREE.Vector3(0.001 * (Math.random() - 0.5), 0, 0); // Stronger random wind
   const SURFACE_TENSION = 0.85;
-  const PARTICLE_LIMIT = 40; // Reduced for performance
-  const SPLASH_PARTICLES = 4; // Fewer splash particles
+  const PARTICLE_LIMIT = 15; // Minimal particles for performance
+  const SPLASH_PARTICLES = 2; // Minimal splash particles
   
   const updateUIBoundaries = useCallback(() => {
     const boundaries: UIBoundary[] = [];
@@ -211,9 +212,9 @@ export function PhysicsWaterSystem() {
 
     camera.position.z = 5;
 
-    // Initialize particles - fewer for performance
+    // Minimal particles, disable on non-homepage
     const particles: WaterParticle[] = [];
-    const particleCount = window.location.pathname === '/' ? 25 : 15; // Reduced initial particles
+    const particleCount = window.location.pathname === '/' ? 8 : 0; // Only on homepage
     for (let i = 0; i < particleCount; i++) {
       const particle = createParticle();
       scene.add(particle.mesh);
@@ -234,11 +235,13 @@ export function PhysicsWaterSystem() {
     };
     window.addEventListener('resize', resizeHandler);
 
-    // Less frequent boundary updates for performance
-    const boundaryUpdateInterval = setInterval(updateUIBoundaries, 3000); // Update every 3 seconds
+    // Minimal boundary updates only on homepage
+    const boundaryUpdateInterval = window.location.pathname === '/' ? 
+      setInterval(updateUIBoundaries, 5000) : null; // 5 seconds or disabled
 
     let lastTime = performance.now();
     let frameCount = 0;
+    let performanceCheckCount = 0;
     
     // Animation loop with performance monitoring
     const animate = (currentTime: number) => {
@@ -247,9 +250,23 @@ export function PhysicsWaterSystem() {
       const deltaTime = currentTime - lastTime;
       lastTime = currentTime;
       frameCount++;
+      performanceCheckCount++;
       
-      // Skip frames if performance is poor - more aggressive
-      if (deltaTime > 24 && frameCount % 2 === 0) return;
+      // Auto-disable if performance is consistently poor
+      if (performanceCheckCount > 60 && deltaTime > 33) { // 30fps threshold
+        performanceDisabledRef.current = true;
+        console.log('Water system disabled due to poor performance');
+        return;
+      }
+      
+      // Skip if disabled by performance monitor
+      if (performanceDisabledRef.current) return;
+      
+      // Very aggressive frame skipping for performance
+      if (deltaTime > 20 && frameCount % 3 === 0) return;
+      
+      // Skip entirely on non-homepage
+      if (window.location.pathname !== '/') return;
 
       const particles = particlesRef.current;
       
@@ -317,11 +334,11 @@ export function PhysicsWaterSystem() {
         }
       });
 
-      // Reduced particle spawning for better performance
-      const spawnRate = window.location.pathname === '/' ? 0.03 : 0.01; // Reduced spawn rate
+      // Only spawn on homepage with minimal rate
+      const spawnRate = window.location.pathname === '/' ? 0.01 : 0; // Homepage only
       if (Math.random() < spawnRate && particles.length < PARTICLE_LIMIT) {
-        // Smaller burst spawning for performance
-        const burstCount = Math.random() < 0.05 ? 2 : 1;
+        // No burst spawning - single particles only
+        const burstCount = 1;
         
         for (let i = 0; i < burstCount && particles.length < PARTICLE_LIMIT; i++) {
           const aspectRatio = window.innerWidth / window.innerHeight;
@@ -346,7 +363,7 @@ export function PhysicsWaterSystem() {
         cancelAnimationFrame(frameRef.current);
       }
       window.removeEventListener('resize', resizeHandler);
-      clearInterval(boundaryUpdateInterval);
+      if (boundaryUpdateInterval) clearInterval(boundaryUpdateInterval);
       
       particlesRef.current.forEach(particle => {
         scene.remove(particle.mesh);
