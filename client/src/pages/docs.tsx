@@ -159,7 +159,7 @@ export default function DocsPage() {
             LabPBR 1.3 Documentation
           </h1>
         </div>
-        <p className="text-xl text-zinc-400 max-w-3xl mx-auto">
+        <p className="text-xl text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto">
           Complete guide to the LabPBR material format for Minecraft resource packs. 
           Learn how to create physically accurate materials for enhanced visual quality.
         </p>
@@ -190,12 +190,12 @@ export default function DocsPage() {
                 <Info className="h-6 w-6 text-blue-400" />
                 What is LabPBR?
               </CardTitle>
-              <CardDescription className="text-sm text-[#9e8f85]">
+              <CardDescription className="text-sm text-muted-foreground">
                 LabPBR (Physically Based Rendering for Labs) is a material format specification designed for Minecraft resource packs.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-zinc-300">
+              <p className="text-foreground dark:text-muted-foreground">
                 LabPBR 1.3 defines how to create realistic materials using multiple texture maps that describe surface properties 
                 like roughness, metallic response, normal details, and emission. This enables shaders to render materials with 
                 physically accurate lighting, reflections, and surface interactions.
@@ -207,8 +207,8 @@ export default function DocsPage() {
                       <div className={`w-12 h-12 rounded-lg ${feature.color}/20 flex items-center justify-center mb-4`}>
                         <feature.icon className={`h-6 w-6 ${feature.color.replace('bg-', 'text-')}`} />
                       </div>
-                      <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
-                      <p className="text-sm text-zinc-400">{feature.description}</p>
+                      <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -282,19 +282,19 @@ export default function DocsPage() {
                   <div key={index} className="border border-zinc-700/30 rounded-lg p-6 bg-zinc-800/20">
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <h3 className="text-xl font-semibold text-white">{texture.name}</h3>
+                        <h3 className="text-xl font-semibold text-foreground">{texture.name}</h3>
                         <code className="text-sm text-green-400 bg-green-500/10 px-2 py-1 rounded mt-2 inline-block">
                           texture{texture.suffix}.png
                         </code>
                       </div>
-                      <Badge variant="outline" className="border-zinc-600 text-zinc-300">
+                      <Badge variant="outline" className="border-border text-foreground">
                         {texture.format}
                       </Badge>
                     </div>
-                    <p className="text-zinc-300 mb-4">{texture.description}</p>
+                    <p className="text-foreground/80 mb-4">{texture.description}</p>
                     <div className="bg-zinc-900/50 rounded p-4">
-                      <h4 className="text-sm font-semibold text-zinc-400 mb-2">Channel Information:</h4>
-                      <p className="text-sm text-zinc-300 font-mono">{texture.channels}</p>
+                      <h4 className="text-sm font-semibold text-muted-foreground mb-2">Channel Information:</h4>
+                      <p className="text-sm text-foreground font-mono">{texture.channels}</p>
                     </div>
                   </div>
                 ))}
@@ -317,13 +317,13 @@ export default function DocsPage() {
                 <div className="space-y-4">
                   <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-red-400 mb-2">Red Channel - Smoothness</h4>
-                    <p className="text-sm text-zinc-300">
+                    <p className="text-sm text-foreground/80">
                       Controls surface roughness. White = smooth/glossy, Black = rough/matte
                     </p>
                   </div>
                   <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-green-400 mb-2">Green Channel - Metallic</h4>
-                    <p className="text-sm text-zinc-300">
+                    <p className="text-sm text-foreground/80">
                       Defines metallic properties. White = metal, Black = non-metal (dielectric)
                     </p>
                   </div>
@@ -331,13 +331,13 @@ export default function DocsPage() {
                 <div className="space-y-4">
                   <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-blue-400 mb-2">Blue Channel - Porosity</h4>
-                    <p className="text-sm text-zinc-300">
+                    <p className="text-sm text-foreground/80">
                       Controls subsurface scattering. White = porous, Black = solid
                     </p>
                   </div>
                   <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-purple-400 mb-2">Alpha Channel - SSS Amount</h4>
-                    <p className="text-sm text-zinc-300">
+                    <p className="text-sm text-foreground/80">
                       Subsurface scattering intensity. Controls light penetration depth
                     </p>
                   </div>
@@ -369,9 +369,9 @@ export default function DocsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <step.icon className="h-5 w-5 text-green-400" />
-                        <h3 className="text-lg font-semibold text-white">{step.title}</h3>
+                        <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
                       </div>
-                      <p className="text-zinc-300">{step.description}</p>
+                      <p className="text-foreground/80">{step.description}</p>
                       {index < workflowSteps.length - 1 && (
                         <div className="w-px h-8 bg-gradient-to-b from-green-500 to-transparent ml-6 mt-4"></div>
                       )}
@@ -393,7 +393,7 @@ export default function DocsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold text-yellow-400">Texture Creation</h4>
-                  <ul className="space-y-2 text-zinc-300 text-sm">
+                  <ul className="space-y-2 text-foreground/80 text-sm">
                     <li>• Start with high-quality base textures (1024x1024 or higher)</li>
                     <li>• Use consistent lighting in your source materials</li>
                     <li>• Remove baked-in lighting and shadows from albedo maps</li>
@@ -403,7 +403,7 @@ export default function DocsPage() {
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold text-blue-400">Performance Tips</h4>
-                  <ul className="space-y-2 text-zinc-300 text-sm">
+                  <ul className="space-y-2 text-foreground/80 text-sm">
                     <li>• Use appropriate texture resolutions for the surface scale</li>
                     <li>• Optimize PNG compression without quality loss</li>
                     <li>• Remove unnecessary alpha channels where possible</li>
