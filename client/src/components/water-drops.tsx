@@ -458,29 +458,68 @@ export function MinecraftFarmlandFooter() {
         ))}
       </div>
 
-      {/* Growing plants scattered across the footer */}
+      {/* Growing plants densely scattered across the footer */}
       <div className="absolute inset-0">
-        {[...Array(12)].map((_, i) => {
+        {[...Array(24)].map((_, i) => {
           const plantImage = plantImages[Math.floor(Math.random() * plantImages.length)];
-          const scale = 1.2 + Math.random() * 0.8; // Larger plants: Random scale 1.2-2.0
+          const scale = 0.6 + Math.random() * 1.8; // Much more varied scale: 0.6-2.4
+          const isSmall = scale < 1.0;
+          const isMedium = scale >= 1.0 && scale < 1.5;
+          const isLarge = scale >= 1.5;
+          
+          // More dense positioning with clusters
+          const xPosition = Math.random() * 95;
+          const yPosition = isLarge ? 5 + Math.random() * 40 : // Large plants more towards back
+                           isMedium ? 15 + Math.random() * 50 : // Medium plants in middle
+                           25 + Math.random() * 65; // Small plants can be anywhere
           
           return (
             <div
               key={`plant-${i}`}
-              className="absolute"
+              className="absolute transition-transform hover:scale-110"
               style={{
                 backgroundImage: `url('${plantImage}')`,
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'contain',
                 imageRendering: 'pixelated',
-                width: `${32 * scale}px`,
-                height: `${32 * scale}px`,
-                left: `${5 + Math.random() * 85}%`,
-                top: `${10 + Math.random() * 60}%`,
-                animationDelay: `${Math.random() * 4}s`,
-                animationDuration: `${4 + Math.random() * 3}s`,
-                transform: `scale(${scale})`,
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                width: `${28 * scale}px`,
+                height: `${28 * scale}px`,
+                left: `${xPosition}%`,
+                top: `${yPosition}%`,
+                animationDelay: `${Math.random() * 6}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+                transform: `scale(${scale}) ${Math.random() > 0.5 ? 'scaleX(-1)' : ''}`, // Some plants flipped
+                filter: `drop-shadow(0 ${2 * scale}px ${4 * scale}px rgba(0,0,0,${0.2 + scale * 0.1}))`,
+                zIndex: Math.floor(scale * 10), // Layering by size
+                opacity: 0.85 + Math.random() * 0.15 // Slight opacity variation
+              }}
+            />
+          );
+        })}
+      </div>
+      
+      {/* Additional small grass tufts for ground cover */}
+      <div className="absolute inset-0">
+        {[...Array(16)].map((_, i) => {
+          const grassImage = Math.random() > 0.5 ? grass : grass1;
+          const tinyScale = 0.3 + Math.random() * 0.4; // Very small grass: 0.3-0.7
+          
+          return (
+            <div
+              key={`grass-${i}`}
+              className="absolute"
+              style={{
+                backgroundImage: `url('${grassImage}')`,
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'contain',
+                imageRendering: 'pixelated',
+                width: `${20 * tinyScale}px`,
+                height: `${20 * tinyScale}px`,
+                left: `${Math.random() * 98}%`,
+                top: `${40 + Math.random() * 55}%`,
+                transform: `scale(${tinyScale}) rotate(${-15 + Math.random() * 30}deg)`,
+                opacity: 0.6 + Math.random() * 0.3,
+                filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
               }}
             />
           );
