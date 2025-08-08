@@ -163,7 +163,7 @@ export default function DocsPage() {
             LabPBR 1.3 Documentation
           </h1>
         </div>
-        <p className="text-xl text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto">
+        <p className="text-xl text-foreground/90 dark:text-muted-foreground max-w-3xl mx-auto">
           Complete guide to the LabPBR material format for Minecraft resource packs. 
           Learn how to create physically accurate materials for enhanced visual quality.
         </p>
@@ -199,7 +199,7 @@ export default function DocsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-foreground dark:text-muted-foreground">
+              <p className="text-foreground/95 dark:text-muted-foreground">
                 LabPBR 1.3 defines how to create realistic materials using multiple texture maps that describe surface properties 
                 like roughness, metallic response, normal details, and emission. This enables shaders to render materials with 
                 physically accurate lighting, reflections, and surface interactions.
@@ -295,7 +295,7 @@ export default function DocsPage() {
                         {texture.format}
                       </Badge>
                     </div>
-                    <p className="text-foreground/80 mb-4">{texture.description}</p>
+                    <p className="text-foreground/90 mb-4">{texture.description}</p>
                     <div className="bg-zinc-900/50 rounded p-4">
                       <h4 className="text-sm font-semibold text-muted-foreground mb-2">Channel Information:</h4>
                       <p className="text-sm text-foreground font-mono">{texture.channels}</p>
@@ -321,13 +321,13 @@ export default function DocsPage() {
                 <div className="space-y-4">
                   <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-red-400 mb-2">Red Channel - Smoothness</h4>
-                    <p className="text-sm text-foreground/80">
+                    <p className="text-sm text-foreground/90">
                       Controls surface roughness. White = smooth/glossy, Black = rough/matte
                     </p>
                   </div>
                   <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-green-400 mb-2">Green Channel - Metallic</h4>
-                    <p className="text-sm text-foreground/80">
+                    <p className="text-sm text-foreground/90">
                       Defines metallic properties. White = metal, Black = non-metal (dielectric)
                     </p>
                   </div>
@@ -335,13 +335,13 @@ export default function DocsPage() {
                 <div className="space-y-4">
                   <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-blue-400 mb-2">Blue Channel - Porosity</h4>
-                    <p className="text-sm text-foreground/80">
+                    <p className="text-sm text-foreground/90">
                       Controls subsurface scattering. White = porous, Black = solid
                     </p>
                   </div>
                   <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-4">
                     <h4 className="font-semibold text-purple-400 mb-2">Alpha Channel - SSS Amount</h4>
-                    <p className="text-sm text-foreground/80">
+                    <p className="text-sm text-foreground/90">
                       Subsurface scattering intensity. Controls light penetration depth
                     </p>
                   </div>
@@ -375,7 +375,7 @@ export default function DocsPage() {
                         <step.icon className="h-5 w-5 text-green-400" />
                         <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
                       </div>
-                      <p className="text-foreground/80">{step.description}</p>
+                      <p className="text-foreground/90">{step.description}</p>
                       {index < workflowSteps.length - 1 && (
                         <div className="w-px h-8 bg-gradient-to-b from-green-500 to-transparent ml-6 mt-4"></div>
                       )}
@@ -397,7 +397,7 @@ export default function DocsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold text-yellow-400">Texture Creation</h4>
-                  <ul className="space-y-2 text-foreground/80 text-sm">
+                  <ul className="space-y-2 text-foreground/90 text-sm">
                     <li>• Start with high-quality base textures (1024x1024 or higher)</li>
                     <li>• Use consistent lighting in your source materials</li>
                     <li>• Remove baked-in lighting and shadows from albedo maps</li>
@@ -407,7 +407,7 @@ export default function DocsPage() {
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-lg font-semibold text-blue-400">Performance Tips</h4>
-                  <ul className="space-y-2 text-foreground/80 text-sm">
+                  <ul className="space-y-2 text-foreground/90 text-sm">
                     <li>• Use appropriate texture resolutions for the surface scale</li>
                     <li>• Optimize PNG compression without quality loss</li>
                     <li>• Remove unnecessary alpha channels where possible</li>
@@ -577,7 +577,7 @@ export default function DocsPage() {
             <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-600 bg-clip-text text-transparent">
               Essential Tools & Resources
             </h2>
-            <p className="text-xl text-foreground/80 dark:text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-xl text-foreground/90 dark:text-muted-foreground max-w-3xl mx-auto">
               Professional software and automation tools for creating high-quality LabPBR textures and streamlining your workflow.
             </p>
           </div>

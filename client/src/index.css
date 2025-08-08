@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  /* Chalky Bonemeal Light Mode - Bright chalky tones */
+  /* Chalky Bonemeal Light Mode - Bright chalky tones with darker text */
   --background: hsl(40, 15%, 92%);
-  --foreground: hsl(30, 20%, 15%);
+  --foreground: hsl(30, 25%, 8%);
   --muted: hsl(35, 12%, 82%);
-  --muted-foreground: hsl(30, 15%, 35%);
+  --muted-foreground: hsl(30, 20%, 25%);
   --popover: hsl(38, 18%, 94%);
-  --popover-foreground: hsl(30, 20%, 15%);
+  --popover-foreground: hsl(30, 25%, 8%);
   --card: hsl(38, 18%, 94%);
-  --card-foreground: hsl(30, 20%, 15%);
+  --card-foreground: hsl(30, 25%, 8%);
   --border: hsl(35, 15%, 75%);
   --input: hsl(35, 12%, 88%);
   --primary: hsl(85, 25%, 45%);
   --primary-foreground: hsl(38, 18%, 94%);
   --secondary: hsl(35, 12%, 80%);
-  --secondary-foreground: hsl(30, 18%, 25%);
+  --secondary-foreground: hsl(30, 22%, 15%);
   --accent: hsl(90, 20%, 55%);
   --accent-foreground: hsl(38, 18%, 94%);
   --destructive: hsl(8, 35%, 55%);
