@@ -572,15 +572,15 @@ export default function DocsPage() {
                   <h4 className="text-lg font-semibold text-green-400">Community Resources</h4>
                   <div className="space-y-3">
                     <Button variant="outline" className="w-full justify-start gap-3 border-zinc-700 hover:bg-zinc-800" asChild>
-                      <a href="https://www.reddit.com/r/feedthebeast" target="_blank" rel="noopener noreferrer">
+                      <a href="https://www.reddit.com/r/Minecraft/" target="_blank" rel="noopener noreferrer">
                         <Database className="h-4 w-4" />
-                        r/FeedTheBeast Community
+                        r/Minecraft on Reddit
                       </a>
                     </Button>
                     <Button variant="outline" className="w-full justify-start gap-3 border-zinc-700 hover:bg-zinc-800" asChild>
-                      <a href="https://discord.gg/shaders" target="_blank" rel="noopener noreferrer">
+                      <a href="https://discord.com/invite/RpzWN9S" target="_blank" rel="noopener noreferrer">
                         <Lightbulb className="h-4 w-4" />
-                        Shaders Discord
+                        ShaderLabs Discord Server
                       </a>
                     </Button>
                   </div>
