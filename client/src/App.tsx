@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/navbar";
-import { WaterDropOverlay } from "@/components/water-drops";
+import { PhysicsWaterSystem, MinecraftFarmlandFooter } from "@/components/water-drops";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
@@ -13,9 +13,9 @@ import Docs from "@/pages/docs";
 
 function Router() {
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative">
-      <WaterDropOverlay />
-      <div className="relative z-10">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative flex flex-col">
+      <PhysicsWaterSystem />
+      <div className="relative z-20 flex-1">
         <Navbar />
         <Switch>
           <Route path="/" component={Home} />
@@ -25,6 +25,7 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </div>
+      <MinecraftFarmlandFooter />
     </div>
   );
 }
