@@ -151,13 +151,16 @@ export default function Greenhouse() {
                   onValidationError={() => setIsValidating(false)}
                 />
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="glass-card p-4">
-                    <ConversionSettings onJobCreated={(jobId) => setActiveJob(jobId)} />
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="glass-card p-4">
+                      <ConversionSettings onJobCreated={(jobId) => setActiveJob(jobId)} />
+                    </div>
+                    <div className="glass-card p-4">
+                      <AdvancedProcessing onJobCreated={(jobId) => setActiveJob(jobId)} />
+                    </div>
                   </div>
-                  <div className="glass-card p-4">
-                    <AdvancedProcessing onJobCreated={(jobId) => setActiveJob(jobId)} />
-                  </div>
+                  <AdvancedInterpolation onSettingsChange={(settings) => console.log('Advanced settings:', settings)} />
                 </div>
               </div>
             </div>
@@ -226,7 +229,7 @@ export default function Greenhouse() {
                 <div className="h-full">
                   <ValidationPanel
                     job={job}
-                    textureFiles={textureFiles || []}
+                    textureFiles={textureFiles as any}
                   />
                 </div>
               </TabsContent>
@@ -244,7 +247,7 @@ export default function Greenhouse() {
               <TabsContent value="files" className="h-full m-0">
                 <div className="h-full">
                   <FilesPanel
-                    selectedJob={job}
+                    selectedJob={job || null}
                     validationResults={validationResults}
                     isValidating={isValidating}
                   />

@@ -142,5 +142,16 @@ The application is configured for development and production environments:
 - **2025-01-17**: Merged Converter and Studio into unified "Greenhouse" page with comprehensive texture automation
 - **2025-01-17**: Created intuitive navigation system with Convert, Projects, Editor, AI Generate, Templates, and Batch views
 - **2025-01-17**: Established greenhouse metaphor perfectly aligning with growth theme and bonemeal branding
+- **2025-08-08**: Added comprehensive Reference tab to Docs page with links to professional texture tools
+- **2025-08-08**: Integrated GIMP, Substance Suite, PhotoGIMP, Bulk Rename Utility, and Python automation resources
+- **2025-08-08**: Implemented advanced image processing with specialized interpolation methods per texture type
+- **2025-08-08**: Added albedo texture processing with Lanczos + pixel-perfect blending at 50% opacity
+- **2025-08-08**: Configured bilinear interpolation for normal maps and Lanczos for specular textures
+- **2025-08-08**: Created AI upscaling feature using Stable Diffusion for 1024x1024 textures
+- **2025-08-08**: Built configuration interface for AI server with public IP and port settings
+- **2025-08-08**: Ensured AI upscaling maintains LabPBR compliance, seamless tiling, and vector data integrity
+- **2025-08-08**: Fixed passport deserialization error with graceful null user handling
+- **2025-08-08**: Optimized water particle system with realistic rain physics and anti-freeze mechanisms
+- **2025-08-08**: Enhanced text contrast in Docs page using theme-aware semantic colors
 
 The architecture prioritizes developer experience with TypeScript throughout, modern tooling, and clear separation of concerns while maintaining performance for image processing operations.
