@@ -474,10 +474,6 @@ export function MinecraftFarmlandFooter() {
 
       {/* Footer content */}
       <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/10">
-        <div className="text-center text-amber-100 drop-shadow-lg">
-          <p className="text-sm font-medium mb-1 text-shadow">Growth happens here</p>
-          <p className="text-xs text-amber-200/90">Water nourishes the Bonemeal ecosystem</p>
-        </div>
       </div>
     </footer>
   );
