@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, LogOut, Home, Folder, Wrench, BookOpen, FileText } from "lucide-react";
+import { User, LogOut, Home, Folder, Leaf, BookOpen } from "lucide-react";
 
 import SkyBlock_items_enchanted_bonemeal_1752287919002 from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
@@ -21,8 +21,7 @@ export function Navbar() {
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/projects", label: "Projects", icon: Folder },
-    { href: "/studio", label: "Studio", icon: Wrench },
-    { href: "/converter", label: "Converter", icon: FileText },
+    { href: "/greenhouse", label: "Greenhouse", icon: Leaf },
     { href: "/docs", label: "Docs", icon: BookOpen },
   ];
 

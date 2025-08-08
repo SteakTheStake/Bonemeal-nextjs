@@ -44,12 +44,18 @@ The application uses two main tables:
 3. **Zip Handler**: Manages resource pack extraction and creation
 
 ### Frontend Components
+- **Greenhouse**: Unified texture automation workspace with 6 main views
 - **Upload Zone**: Drag-and-drop file upload interface
 - **Conversion Settings**: Configurable processing parameters
 - **Texture Preview**: Visual feedback during processing
 - **Progress Panel**: Real-time processing status
 - **Validation Panel**: LabPBR compliance checking
 - **Batch Panel**: Multi-file processing management
+- **Project Dashboard**: Visual project management with grid and stats
+- **Texture Editor**: Visual editing tools with real-time preview
+- **AI Generator**: AI-powered texture creation with style presets
+- **Template Library**: Pre-configured material templates
+- **Batch Processor**: Bulk processing pipeline
 
 ## Data Flow
 
@@ -133,5 +139,8 @@ The application is configured for development and production environments:
 - **2025-01-17**: Added Three.js water dripping animations throughout UI to enhance growth theme
 - **2025-01-17**: Created theme-aware color palette with desaturated chalky tones for both modes
 - **2025-01-17**: Enhanced UI with glassmorphism effects, organic textures, and theme toggle functionality
+- **2025-01-17**: Merged Converter and Studio into unified "Greenhouse" page with comprehensive texture automation
+- **2025-01-17**: Created intuitive navigation system with Convert, Projects, Editor, AI Generate, Templates, and Batch views
+- **2025-01-17**: Established greenhouse metaphor perfectly aligning with growth theme and bonemeal branding
 
 The architecture prioritizes developer experience with TypeScript throughout, modern tooling, and clear separation of concerns while maintaining performance for image processing operations.

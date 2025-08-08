@@ -8,8 +8,7 @@ import { WaterDropOverlay } from "@/components/water-drops";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
-import Converter from "@/pages/converter";
-import Studio from "@/pages/studio";
+import Greenhouse from "@/pages/greenhouse";
 import Docs from "@/pages/docs";
 
 function Router() {
@@ -21,8 +20,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/projects" component={Projects} />
-          <Route path="/converter" component={Converter} />
-          <Route path="/studio" component={Studio} />
+          <Route path="/greenhouse" component={Greenhouse} />
           <Route path="/docs" component={Docs} />
           <Route component={NotFound} />
         </Switch>
