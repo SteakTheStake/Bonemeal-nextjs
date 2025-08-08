@@ -43,9 +43,9 @@ export function PhysicsWaterSystem() {
   const boundariesRef = useRef<UIBoundary[]>([]);
   const performanceDisabledRef = useRef<boolean>(false);
 
-  // Physics constants - Enhanced for dramatic effects
-  const GRAVITY = new THREE.Vector3(0, -0.004, 0); // Stronger gravity
-  const WIND = new THREE.Vector3(0.001 * (Math.random() - 0.5), 0, 0); // Stronger random wind
+  // Physics constants - Realistic rain simulation
+  const GRAVITY = new THREE.Vector3(0, -0.002, 0); // Realistic rain gravity
+  const WIND = new THREE.Vector3((Math.random() - 0.5) * 0.002, 0, 0); // Variable wind per frame
   const SURFACE_TENSION = 0.85;
   const PARTICLE_LIMIT = 15; // Minimal particles for performance
   const SPLASH_PARTICLES = 2; // Minimal splash particles
@@ -162,15 +162,15 @@ export function PhysicsWaterSystem() {
     const worldWidth = 10 * aspectRatio;
     
     mesh.position.set(
-      x ?? (Math.random() - 0.5) * worldWidth * 1.8, // Match coordinate system
-      y ?? 8 + Math.random() * 2, // Spawn from top of screen
-      (Math.random() - 0.5) * 2
+      x ?? (Math.random() - 0.5) * worldWidth * 2.5, // Much wider spread
+      y ?? 8 + Math.random() * 4, // Higher spawn range
+      (Math.random() - 0.5) * 4 // More depth variation
     );
 
     const velocity = customVelocity || new THREE.Vector3(
-      (Math.random() - 0.5) * 0.01, // Much more horizontal randomness for drama
-      -0.005 - Math.random() * 0.008, // Faster, more varied falling speeds
-      0
+      (Math.random() - 0.5) * 0.02, // Much wider horizontal spread
+      -0.003 - Math.random() * 0.004, // Realistic falling speeds with variation
+      (Math.random() - 0.5) * 0.005 // Z-axis movement for 3D effect
     );
 
     return {
@@ -274,9 +274,15 @@ export function PhysicsWaterSystem() {
       particles.forEach((particle, index) => {
         if (particle.life <= 0) return;
 
-        // Apply forces
+        // Apply realistic physics with continuous variation
+        const dynamicWind = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.0005, // Subtle wind variation
+          0,
+          (Math.random() - 0.5) * 0.0003
+        );
+        
         particle.acceleration.copy(GRAVITY);
-        particle.acceleration.add(WIND);
+        particle.acceleration.add(dynamicWind);
         
         // Add turbulence near UI elements with splash detection
         const collisionResult = checkCollisionWithUI(particle, scene);
@@ -299,8 +305,17 @@ export function PhysicsWaterSystem() {
           particle.surfaceTime = 0;
         }
 
-        // Update velocity and position
+        // Update velocity and position with anti-freeze mechanism
         particle.velocity.add(particle.acceleration);
+        
+        // Prevent velocity from becoming zero or too small (prevents freezing)
+        if (Math.abs(particle.velocity.y) < 0.001) {
+          particle.velocity.y = -0.002 - Math.random() * 0.003;
+        }
+        if (Math.abs(particle.velocity.x) < 0.0005 && Math.random() < 0.1) {
+          particle.velocity.x = (Math.random() - 0.5) * 0.004; // Random horizontal kick
+        }
+        
         particle.mesh.position.add(particle.velocity);
 
         // Water reaches farmland (bottom of screen)
@@ -344,8 +359,8 @@ export function PhysicsWaterSystem() {
           const aspectRatio = window.innerWidth / window.innerHeight;
           const worldWidth = 10 * aspectRatio;
           const newParticle = createParticle(
-            (Math.random() - 0.5) * worldWidth * 1.6, // Spawn across screen width
-            8 + Math.random() * 2 // From top of camera bounds
+            (Math.random() - 0.5) * worldWidth * 2.5, // Much wider spawn area
+            8 + Math.random() * 4 // Higher spawn range
           );
           scene.add(newParticle.mesh);
           particles.push(newParticle);
