@@ -274,6 +274,60 @@ export class MemStorage implements IStorage {
     };
   }
 
+  // User presets methods (mock implementation for MemStorage)
+  async getUserPresets(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async createUserPreset(preset: any): Promise<any> {
+    return { id: Date.now(), ...preset, createdAt: new Date(), updatedAt: new Date() };
+  }
+
+  async deleteUserPreset(presetId: number, userId: string): Promise<void> {
+    // Mock implementation
+  }
+
+  async setDefaultPreset(presetId: number, userId: string): Promise<void> {
+    // Mock implementation
+  }
+
+  async unsetDefaultPresets(userId: string, category: string): Promise<void> {
+    // Mock implementation
+  }
+
+  // User favorites methods (mock implementation for MemStorage)
+  async getUserFavorites(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async createUserFavorite(favorite: any): Promise<any> {
+    return { id: Date.now(), ...favorite, createdAt: new Date() };
+  }
+
+  async deleteUserFavorite(favoriteId: number, userId: string): Promise<void> {
+    // Mock implementation
+  }
+
+  async updateUserFavoriteOrder(favoriteId: number, order: number, userId: string): Promise<void> {
+    // Mock implementation
+  }
+
+  async hasProjectAccess(projectId: number, userId: string): Promise<boolean> {
+    return false; // Mock implementation
+  }
+
+  async getProjectByInviteCode(inviteCode: string): Promise<any> {
+    return null; // Mock implementation
+  }
+
+  async getProjectShare(projectId: number, userId: string): Promise<any> {
+    return null; // Mock implementation
+  }
+
+  async createProjectShare(share: any): Promise<any> {
+    return { id: Date.now(), ...share, createdAt: new Date(), joinedAt: new Date() };
+  }
+
   async getProjectShares(projectId: number): Promise<ProjectShare[]> {
     // For MemStorage, return empty array
     return [];

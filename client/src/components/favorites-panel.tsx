@@ -60,10 +60,7 @@ export default function FavoritesPanel({ onNavigateToSection, currentSection }: 
       sectionId: string;
       order: number;
     }) => {
-      await apiRequest("/api/favorites", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      await apiRequest("/api/favorites", "POST", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
@@ -86,9 +83,7 @@ export default function FavoritesPanel({ onNavigateToSection, currentSection }: 
   // Remove favorite mutation
   const removeFavoriteMutation = useMutation({
     mutationFn: async (favoriteId: number) => {
-      await apiRequest(`/api/favorites/${favoriteId}`, {
-        method: "DELETE",
-      });
+      await apiRequest(`/api/favorites/${favoriteId}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
@@ -109,10 +104,7 @@ export default function FavoritesPanel({ onNavigateToSection, currentSection }: 
   // Reorder favorites mutation
   const reorderMutation = useMutation({
     mutationFn: async (updates: { id: number; order: number }[]) => {
-      await apiRequest("/api/favorites/reorder", {
-        method: "POST",
-        body: JSON.stringify({ updates }),
-      });
+      await apiRequest("/api/favorites/reorder", "POST", { updates });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });

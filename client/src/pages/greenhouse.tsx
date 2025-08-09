@@ -20,6 +20,8 @@ import AITextureGenerator from "@/components/ai-texture-generator";
 import TemplateLibrary from "@/components/template-library";
 import BatchProcessor from "@/components/batch-processor";
 import TextureQualityAnalyzer from "@/components/texture-quality-analyzer";
+import FavoritesPanel from "@/components/favorites-panel";
+import PresetsManager from "@/components/presets-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -162,7 +164,22 @@ export default function Greenhouse() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Main View */}
+        {/* Left Sidebar - Favorites Panel */}
+        {!isMobile && (
+          <div className="w-64 border-r border-border/40 bg-background/60 backdrop-blur-sm">
+            <div className="p-4 h-full overflow-auto">
+              <div className="space-y-6">
+                <FavoritesPanel 
+                  onNavigateToSection={setMainView} 
+                  currentSection={mainView} 
+                />
+                <PresetsManager />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main View */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {mainView === 'convert' && !isMobile && (
             <div className="flex-1 p-4 overflow-auto">
@@ -241,8 +258,9 @@ export default function Greenhouse() {
         </div>
 
         {/* Right Panel - Progress & Tools */}
-        <div className="w-80 border-l border-border/40 bg-background/60 backdrop-blur-sm flex flex-col">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        {!isMobile && (
+          <div className="w-80 border-l border-border/40 bg-background/60 backdrop-blur-sm flex flex-col">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-4 m-2">
               <TabsTrigger value="progress" className="text-xs">
                 Progress
@@ -299,6 +317,7 @@ export default function Greenhouse() {
             </div>
           </Tabs>
         </div>
+        )}
       </div>
     </div>
   );
