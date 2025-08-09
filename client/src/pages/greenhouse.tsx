@@ -25,6 +25,7 @@ import PresetsManager from "@/components/presets-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
+import { SettingsProvider } from "@/contexts/settings-context";
 
 export default function Greenhouse() {
   const { isMobile } = useDeviceType();
@@ -92,7 +93,8 @@ export default function Greenhouse() {
   }, [isMobile, mainView]);
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground organic-bg vine-texture transition-colors duration-300">
+    <SettingsProvider>
+      <div className="h-screen flex flex-col bg-background text-foreground organic-bg vine-texture transition-colors duration-300">
       {/* Top Menu Bar */}
       <header className="glass-card moss-texture border-b living-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -170,10 +172,9 @@ export default function Greenhouse() {
             <div className="p-4 h-full overflow-auto">
               <div className="space-y-6">
                 <FavoritesPanel 
-                  onNavigateToSection={setMainView} 
+                  onNavigateToSection={(sectionId) => setMainView(sectionId as any)} 
                   currentSection={mainView} 
                 />
-                <PresetsManager />
               </div>
             </div>
           </div>
@@ -320,5 +321,6 @@ export default function Greenhouse() {
         )}
       </div>
     </div>
+    </SettingsProvider>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,27 +6,51 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Play } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSettings } from "@/contexts/settings-context";
+import { useToast } from "@/hooks/use-toast";
 
 interface ConversionSettingsProps {
   onJobCreated: (jobId: number) => void;
 }
 
 export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
-  const [inputType, setInputType] = useState("single");
-  const [generateBaseColor, setGenerateBaseColor] = useState(true);
-  const [generateRoughness, setGenerateRoughness] = useState(true);
-  const [generateNormal, setGenerateNormal] = useState(true);
-  const [generateHeight, setGenerateHeight] = useState(true);
-  const [generateAO, setGenerateAO] = useState(true);
+  const { settings, updateSettings, triggerUpload, currentFile } = useSettings();
+  const { toast } = useToast();
   
-  const [baseColorContrast, setBaseColorContrast] = useState([1.2]);
-  const [roughnessIntensity, setRoughnessIntensity] = useState([0.8]);
-  const [roughnessInvert, setRoughnessInvert] = useState(false);
-  const [normalStrength, setNormalStrength] = useState([1.0]);
-  const [heightDepth, setHeightDepth] = useState([0.25]);
-  const [aoRadius, setAoRadius] = useState([0.5]);
+  const [inputType, setInputType] = useState(settings.inputType);
+  const [generateBaseColor, setGenerateBaseColor] = useState(settings.generateBaseColor);
+  const [generateRoughness, setGenerateRoughness] = useState(settings.generateRoughness);
+  const [generateNormal, setGenerateNormal] = useState(settings.generateNormal);
+  const [generateHeight, setGenerateHeight] = useState(settings.generateHeight);
+  const [generateAO, setGenerateAO] = useState(settings.generateAO);
+  
+  const [baseColorContrast, setBaseColorContrast] = useState([settings.baseColorContrast]);
+  const [roughnessIntensity, setRoughnessIntensity] = useState([settings.roughnessIntensity]);
+  const [roughnessInvert, setRoughnessInvert] = useState(settings.roughnessInvert);
+  const [normalStrength, setNormalStrength] = useState([settings.normalStrength]);
+  const [heightDepth, setHeightDepth] = useState([settings.heightDepth]);
+  const [aoRadius, setAoRadius] = useState([settings.aoRadius]);
   
   const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Update global settings when local values change
+  useEffect(() => {
+    updateSettings({
+      inputType: inputType as any,
+      generateBaseColor,
+      generateRoughness,
+      generateNormal,
+      generateHeight,
+      generateAO,
+      baseColorContrast: baseColorContrast[0],
+      roughnessIntensity: roughnessIntensity[0],
+      roughnessInvert,
+      normalStrength: normalStrength[0],
+      heightDepth: heightDepth[0],
+      aoRadius: aoRadius[0],
+    });
+  }, [inputType, generateBaseColor, generateRoughness, generateNormal, generateHeight, generateAO,
+      baseColorContrast, roughnessIntensity, roughnessInvert, normalStrength, heightDepth, aoRadius, updateSettings]);
 
   return (
     <div className="flex flex-col h-full">
@@ -59,7 +83,7 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
           <div className="flex items-center space-x-2 mt-2">
             <Checkbox 
               checked={generateBaseColor}
-              onCheckedChange={setGenerateBaseColor}
+              onCheckedChange={(checked) => setGenerateBaseColor(checked === true)}
             />
             <span className="text-sm">Generate</span>
           </div>
@@ -87,7 +111,7 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
           <div className="flex items-center space-x-2 mt-2">
             <Checkbox 
               checked={generateRoughness}
-              onCheckedChange={setGenerateRoughness}
+              onCheckedChange={(checked) => setGenerateRoughness(checked === true)}
             />
             <span className="text-sm">Generate</span>
           </div>
@@ -108,7 +132,7 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   checked={roughnessInvert}
-                  onCheckedChange={setRoughnessInvert}
+                  onCheckedChange={(checked) => setRoughnessInvert(checked === true)}
                 />
                 <span className="text-xs text-muted-foreground">Invert</span>
               </div>
@@ -122,7 +146,7 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
           <div className="flex items-center space-x-2 mt-2">
             <Checkbox 
               checked={generateNormal}
-              onCheckedChange={setGenerateNormal}
+              onCheckedChange={(checked) => setGenerateNormal(checked === true)}
             />
             <span className="text-sm">Generate</span>
           </div>
@@ -150,7 +174,7 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
           <div className="flex items-center space-x-2 mt-2">
             <Checkbox 
               checked={generateHeight}
-              onCheckedChange={setGenerateHeight}
+              onCheckedChange={(checked) => setGenerateHeight(checked === true)}
             />
             <span className="text-sm">Generate</span>
           </div>
@@ -178,7 +202,7 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
           <div className="flex items-center space-x-2 mt-2">
             <Checkbox 
               checked={generateAO}
-              onCheckedChange={setGenerateAO}
+              onCheckedChange={(checked) => setGenerateAO(checked === true)}
             />
             <span className="text-sm">Generate</span>
           </div>
@@ -218,7 +242,20 @@ export function ConversionSettings({ onJobCreated }: ConversionSettingsProps) {
 
       {/* Process Button */}
       <div className="p-4 border-t border-border">
-        <Button className="w-full bg-success hover:bg-success/90 text-white">
+        <Button 
+          className="w-full bg-success hover:bg-success/90 text-white"
+          onClick={() => {
+            if (!currentFile) {
+              toast({
+                title: "No file selected",
+                description: "Please upload a texture file or resource pack first.",
+                variant: "destructive",
+              });
+              return;
+            }
+            triggerUpload();
+          }}
+        >
           <Play className="h-4 w-4 mr-2" />
           Generate Textures
         </Button>

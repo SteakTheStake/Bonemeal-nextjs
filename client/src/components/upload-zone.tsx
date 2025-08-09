@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CloudUpload, FolderOpen, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useSettings } from "@/contexts/settings-context";
 
 interface UploadZoneProps {
   onJobCreated: (jobId: number) => void;
@@ -16,6 +17,7 @@ export function UploadZone({ onJobCreated, onValidationStart, onValidationComple
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { settings, currentFile, setCurrentFile, setUploadCallback } = useSettings();
 
   const validateMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -62,32 +64,8 @@ export function UploadZone({ onJobCreated, onValidationStart, onValidationComple
       const formData = new FormData();
       formData.append("file", file);
       formData.append("settings", JSON.stringify({
-        generateBaseColor: true,
-        generateRoughness: true,
-        generateNormal: true,
-        generateHeight: true,
-        generateAO: true,
-        baseColorContrast: 1.2,
-        roughnessIntensity: 0.8,
-        roughnessInvert: false,
-        normalStrength: 1.0,
-        heightDepth: 0.25,
-        aoRadius: 0.5,
-        inputType: file.name.endsWith('.zip') ? 'resourcepack' : 'single',
-        advancedProcessing: {
-          enableBulkResize: false,
-          baseColorResolution: 256,
-          specularResolution: 256,
-          normalResolution: 256,
-          baseColorInterpolation: 'cubic',
-          specularInterpolation: 'linear',
-          normalInterpolation: 'lanczos',
-          enableCompression: false,
-          compressionQuality: 85,
-          enableDithering: false,
-          enableCTMSplit: false,
-          ctmVariations: 47
-        }
+        ...settings,
+        inputType: file.name.endsWith('.zip') ? 'resourcepack' : settings.inputType,
       }));
 
       console.log('Sending request to /api/upload');
@@ -182,8 +160,25 @@ export function UploadZone({ onJobCreated, onValidationStart, onValidationComple
     if (!validateFile(file)) return;
 
     console.log('File validation passed, starting upload...');
+    setCurrentFile(file);
     uploadMutation.mutate(file);
   };
+  
+  // Register upload callback for other components to trigger
+  useEffect(() => {
+    setUploadCallback(() => () => {
+      if (currentFile) {
+        console.log('Triggered upload from external component');
+        uploadMutation.mutate(currentFile);
+      } else {
+        toast({
+          title: "No file selected",
+          description: "Please select a file to upload first.",
+          variant: "destructive",
+        });
+      }
+    });
+  }, [currentFile, uploadMutation, setUploadCallback, toast]);
 
   const handleFileValidation = (file: File) => {
     console.log('handleFileValidation called with file:', file.name, 'size:', file.size, 'type:', file.type);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +18,8 @@ import {
   Info,
   AlertTriangle
 } from "lucide-react";
+import { useSettings } from "@/contexts/settings-context";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdvancedProcessingProps {
   onJobCreated: (jobId: number) => void;
@@ -32,23 +34,50 @@ const INTERPOLATION_METHODS = [
 ];
 
 export function AdvancedProcessing({ onJobCreated }: AdvancedProcessingProps) {
+  const { settings, updateAdvancedSettings, triggerUpload, currentFile } = useSettings();
+  const { toast } = useToast();
+  
+  // Initialize from global settings
+  const { advancedProcessing } = settings;
+  
   // Bulk Resize Settings
-  const [enableBulkResize, setEnableBulkResize] = useState(false);
-  const [baseColorResolution, setBaseColorResolution] = useState(256);
-  const [specularResolution, setSpecularResolution] = useState(256);
-  const [normalResolution, setNormalResolution] = useState(256);
-  const [baseColorInterpolation, setBaseColorInterpolation] = useState('cubic');
-  const [specularInterpolation, setSpecularInterpolation] = useState('linear');
-  const [normalInterpolation, setNormalInterpolation] = useState('lanczos');
+  const [enableBulkResize, setEnableBulkResize] = useState(advancedProcessing.enableBulkResize);
+  const [baseColorResolution, setBaseColorResolution] = useState(advancedProcessing.baseColorResolution);
+  const [specularResolution, setSpecularResolution] = useState(advancedProcessing.specularResolution);
+  const [normalResolution, setNormalResolution] = useState(advancedProcessing.normalResolution);
+  const [baseColorInterpolation, setBaseColorInterpolation] = useState(advancedProcessing.baseColorInterpolation);
+  const [specularInterpolation, setSpecularInterpolation] = useState(advancedProcessing.specularInterpolation);
+  const [normalInterpolation, setNormalInterpolation] = useState(advancedProcessing.normalInterpolation);
 
   // Compression Settings
-  const [enableCompression, setEnableCompression] = useState(false);
-  const [compressionQuality, setCompressionQuality] = useState([85]);
-  const [enableDithering, setEnableDithering] = useState(false);
+  const [enableCompression, setEnableCompression] = useState(advancedProcessing.enableCompression);
+  const [compressionQuality, setCompressionQuality] = useState([advancedProcessing.compressionQuality]);
+  const [enableDithering, setEnableDithering] = useState(advancedProcessing.enableDithering);
 
   // CTM Settings
-  const [enableCTMSplit, setEnableCTMSplit] = useState(false);
-  const [ctmVariations, setCTMVariations] = useState([47]);
+  const [enableCTMSplit, setEnableCTMSplit] = useState(advancedProcessing.enableCTMSplit);
+  const [ctmVariations, setCTMVariations] = useState([advancedProcessing.ctmVariations]);
+  
+  // Update global settings when local values change
+  useEffect(() => {
+    updateAdvancedSettings({
+      enableBulkResize,
+      baseColorResolution,
+      specularResolution,
+      normalResolution,
+      baseColorInterpolation: baseColorInterpolation as any,
+      specularInterpolation: specularInterpolation as any,
+      normalInterpolation: normalInterpolation as any,
+      enableCompression,
+      compressionQuality: compressionQuality[0],
+      enableDithering,
+      enableCTMSplit,
+      ctmVariations: ctmVariations[0],
+    });
+  }, [enableBulkResize, baseColorResolution, specularResolution, normalResolution,
+      baseColorInterpolation, specularInterpolation, normalInterpolation,
+      enableCompression, compressionQuality, enableDithering,
+      enableCTMSplit, ctmVariations, updateAdvancedSettings]);
 
   return (
     <div className="flex flex-col h-full">
@@ -87,7 +116,7 @@ export function AdvancedProcessing({ onJobCreated }: AdvancedProcessingProps) {
                   <CardTitle className="text-sm">Bulk Texture Resizing</CardTitle>
                   <Checkbox 
                     checked={enableBulkResize}
-                    onCheckedChange={setEnableBulkResize}
+                    onCheckedChange={(checked) => setEnableBulkResize(checked === true)}
                   />
                 </div>
                 <CardDescription className="text-xs">
@@ -226,7 +255,7 @@ export function AdvancedProcessing({ onJobCreated }: AdvancedProcessingProps) {
                   <CardTitle className="text-sm">Texture Compression</CardTitle>
                   <Checkbox 
                     checked={enableCompression}
-                    onCheckedChange={setEnableCompression}
+                    onCheckedChange={(checked) => setEnableCompression(checked === true)}
                   />
                 </div>
                 <CardDescription className="text-xs">
@@ -261,7 +290,7 @@ export function AdvancedProcessing({ onJobCreated }: AdvancedProcessingProps) {
                     <div className="flex items-center space-x-2">
                       <Checkbox 
                         checked={enableDithering}
-                        onCheckedChange={setEnableDithering}
+                        onCheckedChange={(checked) => setEnableDithering(checked === true)}
                       />
                       <Label className="text-xs">Enable Light Diffusion Dithering</Label>
                     </div>
@@ -290,7 +319,7 @@ export function AdvancedProcessing({ onJobCreated }: AdvancedProcessingProps) {
                   <CardTitle className="text-sm">OptiFine CTM Split</CardTitle>
                   <Checkbox 
                     checked={enableCTMSplit}
-                    onCheckedChange={setEnableCTMSplit}
+                    onCheckedChange={(checked) => setEnableCTMSplit(checked === true)}
                   />
                 </div>
                 <CardDescription className="text-xs">
@@ -348,6 +377,25 @@ export function AdvancedProcessing({ onJobCreated }: AdvancedProcessingProps) {
         <Button 
           className="w-full bg-primary hover:bg-primary/90 text-white"
           disabled={!enableBulkResize && !enableCompression && !enableCTMSplit}
+          onClick={() => {
+            if (!currentFile) {
+              toast({
+                title: "No file selected",
+                description: "Please upload a texture file or resource pack first.",
+                variant: "destructive",
+              });
+              return;
+            }
+            if (!enableBulkResize && !enableCompression && !enableCTMSplit) {
+              toast({
+                title: "No processing options selected",
+                description: "Please enable at least one advanced processing option.",
+                variant: "destructive",
+              });
+              return;
+            }
+            triggerUpload();
+          }}
         >
           <Settings2 className="h-4 w-4 mr-2" />
           Apply Advanced Processing
