@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/navbar";
 import MobileNav from "@/components/mobile-nav";
+import PWAInstallPrompt from "@/components/pwa-install-prompt";
 import { MinecraftFarmlandFooter } from "@/components/water-drops";
 import { useDeviceType } from "@/hooks/useDeviceType";
 import NotFound from "@/pages/not-found";
@@ -33,6 +34,7 @@ function Router() {
         </Switch>
       </div>
       <MinecraftFarmlandFooter />
+      <PWAInstallPrompt />
     </div>
   );
 }
