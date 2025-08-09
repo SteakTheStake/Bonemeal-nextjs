@@ -22,6 +22,7 @@ import BatchProcessor from "@/components/batch-processor";
 import TextureQualityAnalyzer from "@/components/texture-quality-analyzer";
 import FavoritesPanel from "@/components/favorites-panel";
 import PresetsManager from "@/components/presets-manager";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -36,6 +37,7 @@ export default function Greenhouse() {
   const [validationResults, setValidationResults] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch' | 'quality'>('convert');
+  const [previewTexture, setPreviewTexture] = useState<{url: string, name: string, type: string} | null>(null);
 
   const { data: jobs } = useQuery<ConversionJob[]>({
     queryKey: ["/api/jobs"],
