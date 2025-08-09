@@ -1,13 +1,18 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen } from "lucide-react";
+import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen, Eye, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDeviceType } from "@/hooks/useDeviceType";
+import MobileNotice from "@/components/mobile-notice";
 import RainAnimation from "@/components/rain-animation";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export default function Home() {
-  const features = [
+  const { isMobile } = useDeviceType();
+  
+  // Full feature set for desktop
+  const desktopFeatures = [
     {
       icon: <Shield className="h-8 w-8 text-primary" />,
       title: "LabPBR Validation",
@@ -39,6 +44,27 @@ export default function Home() {
       description: "Automatic LabPBR naming conventions (_n, _s suffixes)"
     }
   ];
+
+  // Mobile-focused feature set - emphasizing viewing and simple operations
+  const mobileFeatures = [
+    {
+      icon: <Eye className="h-6 w-6 text-primary" />,
+      title: "View Your Work",
+      description: "Browse and preview your texture projects created on desktop"
+    },
+    {
+      icon: <FolderOpen className="h-6 w-6 text-primary" />,
+      title: "Project Access",
+      description: "Access shared projects and view conversion results on-the-go"
+    },
+    {
+      icon: <BarChart3 className="h-6 w-6 text-primary" />,
+      title: "Progress Tracking",
+      description: "Monitor texture processing and validation status from anywhere"
+    }
+  ];
+
+  const features = isMobile ? mobileFeatures : desktopFeatures;
 
   // Fetch real statistics from API  
   const { data: globalStats } = useQuery({
@@ -79,40 +105,71 @@ export default function Home() {
               Transform standard textures into shader-ready LabPBR format with professional-grade tools.
               Perfect for resource pack creators and shader enthusiasts.
             </p>
-            <div className="flex gap-4 justify-center">
-              <Link href="/studio">
-                <Button size="lg" className="grow-button moss-texture">
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Open Studio
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/converter">
-                <Button size="lg" variant="outline" className="grow-button">
-                  Quick Convert
-                </Button>
-              </Link>
-              <Link href="/projects">
-                <Button size="lg" variant="outline" className="grow-button">
-                  <FolderOpen className="mr-2 h-5 w-5" />
-                  View Projects
-                </Button>
-              </Link>
+            <div className={`flex gap-4 justify-center ${isMobile ? 'flex-col items-center max-w-sm mx-auto' : ''}`}>
+              {isMobile ? (
+                <>
+                  <Link href="/projects">
+                    <Button size="lg" className="grow-button moss-texture w-full">
+                      <FolderOpen className="mr-2 h-5 w-5" />
+                      View Your Projects
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/docs">
+                    <Button size="lg" variant="outline" className="grow-button w-full">
+                      Learn LabPBR
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/greenhouse">
+                    <Button size="lg" className="grow-button moss-texture">
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Open Greenhouse
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/projects">
+                    <Button size="lg" variant="outline" className="grow-button">
+                      <FolderOpen className="mr-2 h-5 w-5" />
+                      View Projects
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       </section>
 
+      {/* Mobile Notice */}
+      {isMobile && (
+        <section className="px-6 pb-8">
+          <div className="container mx-auto max-w-2xl">
+            <MobileNotice 
+              feature="texture processing platform" 
+              showDesktopButton={true}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Features Grid */}
       <section className="py-20 px-6">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Professional Texture Processing</h2>
+            <h2 className={`font-bold mb-4 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              {isMobile ? 'Mobile-Friendly Features' : 'Professional Texture Processing'}
+            </h2>
             <p className="text-lg text-muted-foreground">
-              Everything you need to create shader-compatible resource packs
+              {isMobile 
+                ? 'Optimized for viewing and monitoring your texture work on mobile'
+                : 'Everything you need to create shader-compatible resource packs'
+              }
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
             {features.map((feature, index) => (
               <Card key={index} className="moss-card hover:shadow-lg transition-shadow">
                 <CardHeader>

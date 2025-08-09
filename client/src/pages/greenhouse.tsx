@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "wouter";
 import { Box, HelpCircle, Settings, Plus, FolderOpen, Sparkles, Brush, Package, Zap, Home, Leaf } from "lucide-react";
+import { useDeviceType } from "@/hooks/useDeviceType";
+import MobileNotice from "@/components/mobile-notice";
 import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
 import { TexturePreview } from "@/components/texture-preview";
@@ -23,6 +25,7 @@ import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export default function Greenhouse() {
+  const { isMobile } = useDeviceType();
   const searchParams = useSearch();
   const projectId = searchParams ? parseInt(searchParams.replace('?project=', '')) : undefined;
   const [activeJob, setActiveJob] = useState<number | null>(null);
@@ -60,7 +63,8 @@ export default function Greenhouse() {
     }
   }, [jobs, activeJob]);
 
-  const navigationItems = [
+  // Full navigation for desktop
+  const desktopNavigationItems = [
     { key: 'convert', label: 'Convert', icon: Zap, description: 'Upload & convert textures' },
     { key: 'dashboard', label: 'Projects', icon: FolderOpen, description: 'Manage your projects' },
     { key: 'editor', label: 'Editor', icon: Brush, description: 'Visual texture editing' },
@@ -69,6 +73,21 @@ export default function Greenhouse() {
     { key: 'batch', label: 'Batch', icon: Box, description: 'Bulk processing' },
     { key: 'quality', label: 'Quality', icon: Settings, description: 'Texture quality analysis' },
   ];
+
+  // Simplified navigation for mobile - focused on viewing
+  const mobileNavigationItems = [
+    { key: 'dashboard', label: 'Projects', icon: FolderOpen, description: 'View your projects' },
+    { key: 'quality', label: 'Quality', icon: Settings, description: 'Texture analysis' },
+  ];
+
+  const navigationItems = isMobile ? mobileNavigationItems : desktopNavigationItems;
+
+  // Override default view for mobile to focus on projects
+  useEffect(() => {
+    if (isMobile && mainView === 'convert') {
+      setMainView('dashboard');
+    }
+  }, [isMobile, mainView]);
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground organic-bg vine-texture transition-colors duration-300">
@@ -131,11 +150,21 @@ export default function Greenhouse() {
         </div>
       </div>
 
+      {/* Mobile Notice */}
+      {isMobile && (
+        <div className="px-4 py-2 bg-amber-50/5 dark:bg-amber-900/10">
+          <MobileNotice 
+            feature="advanced texture processing tools" 
+            showDesktopButton={false}
+          />
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Main View */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {mainView === 'convert' && (
+          {mainView === 'convert' && !isMobile && (
             <div className="flex-1 p-4 overflow-auto">
               <div className="max-w-4xl mx-auto space-y-6">
                 <div className="text-center space-y-2">

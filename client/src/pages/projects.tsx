@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Plus, Trash2, Edit, FolderOpen, ArrowLeft, Calendar, FileText, Package } from "lucide-react";
+import { useDeviceType } from "@/hooks/useDeviceType";
+import MobileNotice from "@/components/mobile-notice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -23,6 +25,7 @@ interface Project {
 }
 
 export default function Projects() {
+  const { isMobile } = useDeviceType();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -154,14 +157,15 @@ export default function Projects() {
               <span className="text-lg font-semibold text-primary">Projects</span>
             </div>
           </div>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="grow-button moss-texture">
-                <Plus className="h-4 w-4 mr-2" />
-                New Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="glass-card moss-texture">
+          {!isMobile && (
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="grow-button moss-texture">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Project
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass-card moss-texture">
               <DialogHeader>
                 <DialogTitle>Create New Project</DialogTitle>
                 <DialogDescription>
@@ -198,9 +202,20 @@ export default function Projects() {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          )}
         </div>
       </header>
+
+      {/* Mobile Notice */}
+      {isMobile && (
+        <div className="container mx-auto px-6 py-4">
+          <MobileNotice 
+            feature="project management and editing tools" 
+            showDesktopButton={true}
+          />
+        </div>
+      )}
 
       {/* Projects Grid */}
       <main className="container mx-auto px-6 py-8">
@@ -210,7 +225,7 @@ export default function Projects() {
             <p className="text-muted-foreground">Loading projects...</p>
           </div>
         ) : projects && projects.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
             {projects.map((project) => (
               <Card key={project.id} className="moss-card hover:shadow-lg transition-shadow">
                 <CardHeader>

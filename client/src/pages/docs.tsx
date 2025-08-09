@@ -267,6 +267,12 @@ export default function DocsPage() {
           >
             Reference
           </button>
+          <button
+            onClick={() => document.getElementById('f0-values')?.scrollIntoView({ behavior: 'smooth' })}
+            className="px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-colors"
+          >
+            F0 Values
+          </button>
         </div>
       </div>
 
@@ -591,6 +597,236 @@ export default function DocsPage() {
                       </a>
                     </Button>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* F0 Values Section */}
+        <section id="f0-values" className="space-y-8 scroll-mt-20">
+          <div className="text-center space-y-4">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+              LabPBR F0 Reference Values
+            </h2>
+            <p className="text-xl text-foreground/90 dark:text-muted-foreground max-w-3xl mx-auto">
+              Comprehensive material reference table and specular map analyzer for physically accurate texture creation.
+            </p>
+          </div>
+
+          {/* F0 Analyzer */}
+          <F0Analyzer />
+
+          {/* Material Reference Tables */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Liquids */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Droplets className="h-6 w-6 text-blue-400" />
+                  Liquids
+                </CardTitle>
+                <CardDescription>
+                  F0 values for various liquid materials
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-3 gap-2 text-xs font-medium text-muted-foreground border-b pb-1">
+                    <span>Material</span>
+                    <span>Reflectance</span>
+                    <span>F0</span>
+                  </div>
+                  {[
+                    { name: "Ice, Boiling Water", reflectance: "1.80%", f0: 5 },
+                    { name: "Water, Blood, Tears", reflectance: "2.10%", f0: 5 },
+                    { name: "Beer", reflectance: "2.20%", f0: 6 },
+                    { name: "Milk, Soda, Juice", reflectance: "2.30%", f0: 6 },
+                    { name: "Shampoo, Sugar 25%", reflectance: "2.50%", f0: 6 },
+                    { name: "Fuel, Lamp Oil", reflectance: "2.70%", f0: 7 },
+                    { name: "Juice Concentrate", reflectance: "3.20%", f0: 8 },
+                    { name: "Vegetable Oil", reflectance: "3.60%", f0: 9 },
+                    { name: "Liquid Honey", reflectance: "3.70%", f0: 9 },
+                    { name: "Viscous Honey", reflectance: "4.10%", f0: 10 },
+                    { name: "Hydraulic Fluid", reflectance: "5.10%", f0: 13 },
+                    { name: "Liquid Mercury", reflectance: "5.60%", f0: 14 }
+                  ].map((material, index) => (
+                    <div key={index} className="grid grid-cols-3 gap-2 text-xs py-1 hover:bg-zinc-800/30 rounded px-2">
+                      <span className="text-white truncate" title={material.name}>{material.name}</span>
+                      <span className="text-blue-400">{material.reflectance}</span>
+                      <span className="text-green-400 font-mono">{material.f0}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Surfaces */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Shield className="h-6 w-6 text-green-400" />
+                  Surfaces
+                </CardTitle>
+                <CardDescription>
+                  F0 values for common surface materials
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-3 gap-2 text-xs font-medium text-muted-foreground border-b pb-1">
+                    <span>Material</span>
+                    <span>Reflectance</span>
+                    <span>F0</span>
+                  </div>
+                  {[
+                    { name: "Teflon", reflectance: "2.30%", f0: 6 },
+                    { name: "Skin", reflectance: "3.30%", f0: 8 },
+                    { name: "Plastic, Plant, Leaf", reflectance: "3.50%", f0: 9 },
+                    { name: "Rust, Stone, Rock", reflectance: "3.90%", f0: 10 },
+                    { name: "Fabrics, Fibers", reflectance: "4.00%", f0: 10 },
+                    { name: "Wood, Plastic", reflectance: "4.30%", f0: 11 },
+                    { name: "Pearl, Nylon, Rubber", reflectance: "4.40%", f0: 11 },
+                    { name: "Ivory, Teeth, Clay", reflectance: "4.60%", f0: 12 },
+                    { name: "CD, DVD, Optical", reflectance: "4.90%", f0: 12 },
+                    { name: "Polystyrene", reflectance: "5.00%", f0: 13 },
+                    { name: "Teeth Enamel", reflectance: "5.80%", f0: 15 },
+                    { name: "Ceramic, Asphalt", reflectance: "6.00%", f0: 15 },
+                    { name: "Pearl, Glitter", reflectance: "6.60%", f0: 17 },
+                    { name: "Lead", reflectance: "11.30%", f0: 29 }
+                  ].map((material, index) => (
+                    <div key={index} className="grid grid-cols-3 gap-2 text-xs py-1 hover:bg-zinc-800/30 rounded px-2">
+                      <span className="text-white truncate" title={material.name}>{material.name}</span>
+                      <span className="text-blue-400">{material.reflectance}</span>
+                      <span className="text-green-400 font-mono">{material.f0}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gems */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Gem className="h-6 w-6 text-purple-400" />
+                  Gems & Crystals
+                </CardTitle>
+                <CardDescription>
+                  F0 values for precious stones and crystals
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-3 gap-2 text-xs font-medium text-muted-foreground border-b pb-1">
+                    <span>Material</span>
+                    <span>Reflectance</span>
+                    <span>F0</span>
+                  </div>
+                  {[
+                    { name: "Quartz", reflectance: "3.40%", f0: 9 },
+                    { name: "Salt, Jasper", reflectance: "4.50%", f0: 11 },
+                    { name: "Agate, Amethyst", reflectance: "4.70%", f0: 12 },
+                    { name: "Emerald", reflectance: "5.10%", f0: 13 },
+                    { name: "Topaz", reflectance: "5.60%", f0: 14 },
+                    { name: "Jade", reflectance: "6.30%", f0: 16 },
+                    { name: "Sapphire", reflectance: "7.60%", f0: 19 },
+                    { name: "Crystal", reflectance: "9.20%", f0: 23 },
+                    { name: "Ruby", reflectance: "12.40%", f0: 32 },
+                    { name: "Cubic Zirconia", reflectance: "13.00%", f0: 33 },
+                    { name: "Diamond", reflectance: "17.00%", f0: 43 }
+                  ].map((material, index) => (
+                    <div key={index} className="grid grid-cols-3 gap-2 text-xs py-1 hover:bg-zinc-800/30 rounded px-2">
+                      <span className="text-white truncate" title={material.name}>{material.name}</span>
+                      <span className="text-blue-400">{material.reflectance}</span>
+                      <span className="text-green-400 font-mono">{material.f0}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Metals */}
+            <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <FlaskConical className="h-6 w-6 text-yellow-400" />
+                  Metals
+                </CardTitle>
+                <CardDescription>
+                  F0 values for metallic materials (use metallic channel)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2 text-xs font-medium text-muted-foreground border-b pb-1">
+                    <span>Metal</span>
+                    <span>F0 Value</span>
+                  </div>
+                  {[
+                    { name: "Iron", f0: 230 },
+                    { name: "Gold", f0: 231 },
+                    { name: "Aluminum", f0: 232 },
+                    { name: "Chrome", f0: 233 },
+                    { name: "Copper", f0: 234 },
+                    { name: "Lead", f0: 235 },
+                    { name: "Platinum", f0: 236 },
+                    { name: "Silver", f0: 237 }
+                  ].map((material, index) => (
+                    <div key={index} className="grid grid-cols-2 gap-2 text-xs py-1 hover:bg-zinc-800/30 rounded px-2">
+                      <span className="text-white">{material.name}</span>
+                      <span className="text-yellow-400 font-mono">{material.f0}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-yellow-900/20 rounded-lg border border-yellow-700/30">
+                  <p className="text-xs text-yellow-300">
+                    <Info className="h-3 w-3 inline mr-1" />
+                    Metals use F0 values 230-237 with the metallic channel enabled
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Usage Guidelines */}
+          <Card className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/50 border-zinc-700/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <Search className="h-6 w-6 text-cyan-400" />
+                Using F0 Values in Your Textures
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-cyan-400">Specular Map Creation</h4>
+                  <ul className="space-y-2 text-foreground/90 text-sm">
+                    <li>• Use the red channel for F0 values (0-255)</li>
+                    <li>• Convert percentage to 8-bit: F0_value * 255/100</li>
+                    <li>• For wood (F0=11): red channel = 11</li>
+                    <li>• For metals: use values 230-237 with metallic=true</li>
+                    <li>• Avoid values above 43 for non-metals</li>
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-orange-400">Physical Accuracy</h4>
+                  <ul className="space-y-2 text-foreground/90 text-sm">
+                    <li>• Match materials to their real-world reflectance</li>
+                    <li>• Use the F0 analyzer to check existing textures</li>
+                    <li>• Most dielectrics have F0 values 5-20</li>
+                    <li>• Water-based materials typically use F0=5-7</li>
+                    <li>• High F0 values (&gt;30) are rare in nature</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
+                <h4 className="font-semibold text-white mb-2">Quick Reference Formula</h4>
+                <div className="bg-black/50 rounded p-3 font-mono text-sm">
+                  <div className="text-green-400">// Convert reflectance percentage to F0 value</div>
+                  <div className="text-white">F0_red_channel = reflectance_percentage * 255 / 100</div>
+                  <div className="text-blue-400 mt-2">// Example: 4% reflectance = 4 * 255 / 100 ≈ 10</div>
                 </div>
               </div>
             </CardContent>
