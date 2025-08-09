@@ -63,7 +63,7 @@ export default function DocsPage() {
   const textureTypes = [
     {
       name: "Albedo (Diffuse)",
-      file: "_s.png",
+      file: "no suffix",
       format: "RGB",
       description: "Base color and diffuse lighting information without shadows or highlights",
       channels: "RGB: Color information"
