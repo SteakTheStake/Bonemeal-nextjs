@@ -9,7 +9,7 @@ import { setupDiscordAuth, isAuthenticated, isOptionallyAuthenticated } from "./
 // Extend Express Request interface for multer
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
-  files?: Express.Multer.File[];
+  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
 }
 import { TextureProcessor } from "./services/texture-processor";
 import { LabPBRConverter } from "./services/labpbr-converter";
@@ -192,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload and process files
-  app.post("/api/upload", upload.single("file"), async (req: MulterRequest, res) => {
+  app.post("/api/upload", upload.single("file"), async (req: any, res) => {
     try {
       console.log('Upload request received');
       console.log('File:', req.file ? {
@@ -307,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Validate textures
-  app.post("/api/validate", upload.single("file"), async (req: MulterRequest, res) => {
+  app.post("/api/validate", upload.single("file"), async (req: any, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });

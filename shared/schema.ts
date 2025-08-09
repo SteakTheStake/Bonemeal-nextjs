@@ -106,6 +106,34 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// User presets table for saving configurations
+export const userPresets = pgTable("user_presets", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: varchar("description", { length: 500 }),
+  category: varchar("category", { length: 50 }).notNull(), // conversion, processing, ai, etc.
+  settings: jsonb("settings").notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User favorites table for pinned sections
+export const userFavorites = pgTable("user_favorites", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  sectionType: varchar("section_type", { length: 50 }).notNull(), // greenhouse sections
+  sectionId: varchar("section_id", { length: 100 }).notNull(),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type UserPreset = typeof userPresets.$inferSelect;
+export type InsertUserPreset = typeof userPresets.$inferInsert;
+export type UserFavorite = typeof userFavorites.$inferSelect;
+export type InsertUserFavorite = typeof userFavorites.$inferInsert;
+
 export const insertConversionJobSchema = createInsertSchema(conversionJobs).pick({
   filename: true,
   status: true,
