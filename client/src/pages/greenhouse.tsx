@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "wouter";
 import { Box, HelpCircle, Settings, Plus, FolderOpen, Sparkles, Brush, Package, Zap, Home, Leaf } from "lucide-react";
-import { useDeviceType } from "@/hooks/useDeviceType";
+
 import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
 import { ConversionSettings } from "@/components/conversion-settings";
@@ -28,7 +28,7 @@ import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002
 import { SettingsProvider } from "@/contexts/settings-context";
 
 export default function Greenhouse() {
-  const { isMobile } = useDeviceType();
+
   const searchParams = useSearch();
   const projectId = searchParams ? parseInt(searchParams.replace('?project=', '')) : undefined;
   const [activeJob, setActiveJob] = useState<number | null>(null);

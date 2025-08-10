@@ -3,12 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen, Eye, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDeviceType } from "@/hooks/useDeviceType";
+
 import RainAnimation from "@/components/rain-animation";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export default function Home() {
-  const { isMobile } = useDeviceType();
   
   // Full feature set for desktop
   const desktopFeatures = [
@@ -86,7 +85,7 @@ export default function Home() {
               Transform standard textures into shader-ready LabPBR format with professional-grade tools.
               Perfect for resource pack creators and shader enthusiasts.
             </p>
-            <div className={`flex gap-4 justify-center ${isMobile ? 'flex-col items-center max-w-sm mx-auto' : ''}`}>
+            <div className="flex gap-4 justify-center flex-col sm:flex-row items-center sm:items-start max-w-sm sm:max-w-none mx-auto">
               <Link href="/greenhouse">
                 <Button size="lg" className="grow-button moss-texture">
                   <Sparkles className="mr-2 h-5 w-5" />
@@ -111,14 +110,14 @@ export default function Home() {
       <section className="py-20 px-6">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className={`font-bold mb-4 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Professional Texture Processing
             </h2>
             <p className="text-lg text-muted-foreground">
               Everything you need to create shader-compatible resource packs
             </p>
           </div>
-          <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => (
               <Card key={index} className="moss-card hover:shadow-lg transition-shadow">
                 <CardHeader>

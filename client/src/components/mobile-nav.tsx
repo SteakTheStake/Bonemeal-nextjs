@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { DonationModal } from "@/components/donation-modal";
 import { 
   Menu, 
   Home, 
@@ -11,7 +12,7 @@ import {
   Sprout, 
   User, 
   LogOut,
-  Monitor
+  Heart
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -20,6 +21,7 @@ export default function MobileNav() {
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [showDonationModal, setShowDonationModal] = useState(false);
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
@@ -28,12 +30,7 @@ export default function MobileNav() {
     { href: "/docs", label: "Documentation", icon: BookOpen },
   ];
 
-  const desktopNoticeItems = [
-    { href: "/greenhouse", label: "Full Greenhouse Studio" },
-    { href: "/greenhouse?view=editor", label: "Visual Texture Editor" },
-    { href: "/greenhouse?view=ai", label: "AI Texture Generation" },
-    { href: "/greenhouse?view=batch", label: "Batch Processing" },
-  ];
+
 
   const closeSheet = () => setIsOpen(false);
 
@@ -114,34 +111,18 @@ export default function MobileNav() {
                 ))}
               </nav>
 
-              {/* Desktop Features Notice */}
-              <div className="p-4 bg-amber-50/5 dark:bg-amber-900/10 rounded-lg border border-amber-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <Monitor className="h-4 w-4 text-amber-600" />
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                    Desktop Features
-                  </span>
-                </div>
-                <p className="text-xs text-amber-600 dark:text-amber-300 mb-3">
-                  Enhanced tools available on desktop:
-                </p>
-                <div className="space-y-1">
-                  {desktopNoticeItems.map((item, index) => (
-                    <div key={index} className="text-xs text-amber-600 dark:text-amber-300">
-                      • {item.label}
-                    </div>
-                  ))}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full mt-3 border-amber-500/30 text-amber-600 hover:bg-amber-50/10"
+              {/* Support Button */}
+              <div className="pt-4 border-t border-border/40">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-3 grow-button"
                   onClick={() => {
-                    navigator.clipboard.writeText(window.location.href);
+                    setShowDonationModal(true);
                     closeSheet();
                   }}
                 >
-                  Copy URL for Desktop
+                  <Heart className="h-4 w-4 text-pink-500" />
+                  Support Development
                 </Button>
               </div>
 
@@ -176,6 +157,9 @@ export default function MobileNav() {
           </SheetContent>
         </Sheet>
       </div>
+      
+      {/* Donation Modal */}
+      <DonationModal open={showDonationModal} onOpenChange={setShowDonationModal} />
     </header>
   );
 }
