@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,13 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User, LogOut, Home, Folder, Leaf, BookOpen } from "lucide-react";
+import { User, LogOut, Home, Folder, Leaf, BookOpen, Heart } from "lucide-react";
+import { DonationModal } from "@/components/donation-modal";
 
 import SkyBlock_items_enchanted_bonemeal_1752287919002 from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
 export function Navbar() {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [showDonationModal, setShowDonationModal] = useState(false);
 
   const navItems = [
     { href: "/", label: "Home", icon: Home },
@@ -66,6 +69,15 @@ export function Navbar() {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDonationModal(true)}
+              className="glass-card flex items-center gap-2"
+            >
+              <Heart className="h-4 w-4 text-pink-500" />
+              <span className="hidden sm:inline">Support</span>
+            </Button>
             <ThemeToggle />
             {isLoading ? (
               <div className="h-8 w-8 animate-pulse bg-muted/50 rounded-full" />
@@ -128,6 +140,8 @@ export function Navbar() {
           </div>
         </div>
       </div>
+      {/* Donation Modal */}
+      <DonationModal open={showDonationModal} onOpenChange={setShowDonationModal} />
     </nav>
   );
 }

@@ -765,6 +765,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Uploaded content routes
+  app.get("/api/uploaded-content", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const content = await storage.getUploadedContent(userId);
+      res.json(content);
+    } catch (error) {
+      console.error("Error fetching uploaded content:", error);
+      res.status(500).json({ message: "Failed to fetch uploaded content" });
+    }
+  });
+
+  app.post("/api/uploaded-content", isAuthenticated, upload.single("file"), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const userId = req.user.claims.sub;
+      
+      // Save file reference to database
+      const content = await storage.createUploadedContent({
+        userId,
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
+        fileType: req.file.mimetype,
+        fileUrl: `/uploads/${req.file.originalname}`, // This would normally be a proper file storage URL
+        thumbnailUrl: req.file.mimetype.startsWith('image/') ? `/uploads/thumb_${req.file.originalname}` : null,
+        metadata: {
+          uploadedAt: new Date().toISOString()
+        }
+      });
+
+      // Also save to uploaded content when processing files
+      if (req.body.saveToLibrary === 'true') {
+        // Save the actual file buffer somewhere (normally to cloud storage)
+        // For now we'll just track the metadata
+      }
+
+      res.json(content);
+    } catch (error) {
+      console.error("Error saving uploaded content:", error);
+      res.status(500).json({ message: "Failed to save uploaded content" });
+    }
+  });
+
+  app.delete("/api/uploaded-content/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const contentId = parseInt(req.params.id);
+      
+      const success = await storage.deleteUploadedContent(contentId, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Content not found or unauthorized" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting uploaded content:", error);
+      res.status(500).json({ message: "Failed to delete uploaded content" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

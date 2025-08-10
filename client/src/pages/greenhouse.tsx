@@ -22,6 +22,7 @@ import TextureQualityAnalyzer from "@/components/texture-quality-analyzer";
 import FavoritesPanel from "@/components/favorites-panel";
 import PresetsManager from "@/components/presets-manager";
 import { TexturePreview } from "@/components/texture-preview";
+import { UploadedContent } from "@/components/uploaded-content";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -35,7 +36,7 @@ export default function Greenhouse() {
   const [activeTab, setActiveTab] = useState("progress");
   const [validationResults, setValidationResults] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
-  const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch' | 'quality'>('convert');
+  const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch' | 'quality' | 'library'>('convert');
   const [previewTexture, setPreviewTexture] = useState<{url: string, name: string, type: string} | null>(null);
 
   const { data: jobs } = useQuery<ConversionJob[]>({
@@ -71,6 +72,7 @@ export default function Greenhouse() {
   const desktopNavigationItems = [
     { key: 'convert', label: 'Convert', icon: Zap, description: 'Upload & convert textures' },
     { key: 'dashboard', label: 'Projects', icon: FolderOpen, description: 'Manage your projects' },
+    { key: 'library', label: 'Library', icon: Box, description: 'Your uploaded content' },
     { key: 'editor', label: 'Editor', icon: Brush, description: 'Visual texture editing' },
     { key: 'ai', label: 'AI Generate', icon: Sparkles, description: 'AI-powered generation' },
     { key: 'templates', label: 'Templates', icon: Package, description: 'Material templates' },
@@ -266,6 +268,12 @@ export default function Greenhouse() {
                 </div>
                 <TextureQualityAnalyzer />
               </div>
+            </div>
+          )}
+
+          {mainView === 'library' && (
+            <div className="flex-1 overflow-hidden">
+              <UploadedContent />
             </div>
           )}
         </div>

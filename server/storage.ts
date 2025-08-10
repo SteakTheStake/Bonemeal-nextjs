@@ -1,4 +1,4 @@
-import { projects, conversionJobs, textureFiles, users, projectShares, type Project, type InsertProject, type ConversionJob, type InsertConversionJob, type TextureFile, type InsertTextureFile, type ValidationIssue, type ProcessingStatus, type User, type UpsertUser, type ProjectShare, type InsertProjectShare } from "@shared/schema";
+import { projects, conversionJobs, textureFiles, users, projectShares, uploadedContent, type Project, type InsertProject, type ConversionJob, type InsertConversionJob, type TextureFile, type InsertTextureFile, type ValidationIssue, type ProcessingStatus, type User, type UpsertUser, type ProjectShare, type InsertProjectShare, type UploadedContent, type InsertUploadedContent } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -38,6 +38,12 @@ export interface IStorage {
   // Processing status
   getProcessingStatus(jobId: number): Promise<ProcessingStatus | undefined>;
   updateProcessingStatus(jobId: number, status: ProcessingStatus): Promise<void>;
+  
+  // Uploaded content
+  createUploadedContent(content: InsertUploadedContent): Promise<UploadedContent>;
+  getUploadedContent(userId: string): Promise<UploadedContent[]>;
+  getUploadedContentById(id: number): Promise<UploadedContent | undefined>;
+  deleteUploadedContent(id: number, userId: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -46,9 +52,11 @@ export class MemStorage implements IStorage {
   private conversionJobs: Map<number, ConversionJob>;
   private textureFiles: Map<number, TextureFile>;
   private processingStatus: Map<number, ProcessingStatus>;
+  private uploadedContent: Map<number, UploadedContent>;
   private currentProjectId: number;
   private currentJobId: number;
   private currentFileId: number;
+  private currentUploadedContentId: number;
 
   constructor() {
     this.users = new Map();
@@ -56,9 +64,11 @@ export class MemStorage implements IStorage {
     this.conversionJobs = new Map();
     this.textureFiles = new Map();
     this.processingStatus = new Map();
+    this.uploadedContent = new Map();
     this.currentProjectId = 1;
     this.currentJobId = 1;
     this.currentFileId = 1;
+    this.currentUploadedContentId = 1;
   }
 
   clearAllJobs() {
@@ -314,6 +324,34 @@ export class MemStorage implements IStorage {
 
   async hasProjectAccess(projectId: number, userId: string): Promise<boolean> {
     return false; // Mock implementation
+  }
+  
+  // Uploaded content methods
+  async createUploadedContent(content: InsertUploadedContent): Promise<UploadedContent> {
+    const newContent: UploadedContent = {
+      id: this.currentUploadedContentId++,
+      ...content,
+      uploadDate: new Date()
+    };
+    this.uploadedContent.set(newContent.id, newContent);
+    return newContent;
+  }
+
+  async getUploadedContent(userId: string): Promise<UploadedContent[]> {
+    return Array.from(this.uploadedContent.values()).filter(c => c.userId === userId);
+  }
+
+  async getUploadedContentById(id: number): Promise<UploadedContent | undefined> {
+    return this.uploadedContent.get(id);
+  }
+
+  async deleteUploadedContent(id: number, userId: string): Promise<boolean> {
+    const content = this.uploadedContent.get(id);
+    if (content && content.userId === userId) {
+      this.uploadedContent.delete(id);
+      return true;
+    }
+    return false;
   }
 
   async getProjectByInviteCode(inviteCode: string): Promise<any> {

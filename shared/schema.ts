@@ -65,6 +65,19 @@ export const conversionJobs = pgTable("conversion_jobs", {
   completedAt: timestamp("completed_at"),
 });
 
+// Uploaded content table for storing user uploads
+export const uploadedContent = pgTable("uploaded_content", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  fileName: text("file_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  fileType: text("file_type").notNull(),
+  fileUrl: text("file_url"),
+  thumbnailUrl: text("thumbnail_url"),
+  metadata: json("metadata"),
+  uploadDate: timestamp("upload_date").defaultNow(),
+});
+
 export const textureFiles = pgTable("texture_files", {
   id: serial("id").primaryKey(),
   jobId: integer("job_id").references(() => conversionJobs.id),
@@ -150,6 +163,15 @@ export const insertTextureFileSchema = createInsertSchema(textureFiles).pick({
 
 export type ConversionJob = typeof conversionJobs.$inferSelect;
 export type InsertConversionJob = z.infer<typeof insertConversionJobSchema>;
+
+// Uploaded content schemas
+export const insertUploadedContentSchema = createInsertSchema(uploadedContent).omit({
+  id: true,
+  uploadDate: true,
+});
+
+export type UploadedContent = typeof uploadedContent.$inferSelect;
+export type InsertUploadedContent = z.infer<typeof insertUploadedContentSchema>;
 export type TextureFile = typeof textureFiles.$inferSelect;
 export type InsertTextureFile = z.infer<typeof insertTextureFileSchema>;
 
