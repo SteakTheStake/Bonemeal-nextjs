@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { type UserFavorite } from "@shared/schema";
@@ -177,6 +177,9 @@ export default function FavoritesPanel({ onNavigateToSection, currentSection }: 
             <DialogContent className="glass-card">
               <DialogHeader>
                 <DialogTitle>Pin Section</DialogTitle>
+                <DialogDescription>
+                  Select a section to pin for quick access
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
