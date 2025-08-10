@@ -22,8 +22,12 @@ function Router() {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 relative flex flex-col">
       <div className="relative z-20 flex-1">
-        {/* Show mobile nav on mobile, desktop nav on desktop */}
-        {isMobile ? <MobileNav /> : <Navbar />}
+        {/* Always show desktop navbar with responsive design - no mobile limitations */}
+        <Navbar />
+        {/* Show mobile nav only on small screens using CSS media queries */}
+        <div className="md:hidden">
+          <MobileNav />
+        </div>
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/projects" component={Projects} />
