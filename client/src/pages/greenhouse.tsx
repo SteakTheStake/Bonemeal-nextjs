@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "wouter";
 import { Box, HelpCircle, Settings, Plus, FolderOpen, Sparkles, Brush, Package, Zap, Home, Leaf } from "lucide-react";
 import { useDeviceType } from "@/hooks/useDeviceType";
-import MobileNotice from "@/components/mobile-notice";
 import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
 import { ConversionSettings } from "@/components/conversion-settings";

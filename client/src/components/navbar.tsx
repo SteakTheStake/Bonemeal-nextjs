@@ -70,6 +70,14 @@ export function Navbar() {
                       </DropdownMenuItem>
                     </Link>
                   ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="gap-2 text-muted-foreground cursor-pointer"
+                    onClick={() => setShowDonationModal(true)}
+                  >
+                    <Heart className="h-4 w-4" />
+                    Support
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
