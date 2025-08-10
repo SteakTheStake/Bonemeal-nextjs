@@ -174,5 +174,13 @@ The application is configured for development and production environments:
 - **2025-08-09**: Enhanced mobile viewport configuration and app manifest for proper mobile installation
 - **2025-08-09**: Integrated push notification support and app shortcuts for common actions
 - **2025-08-09**: Added comprehensive meta tags for social media sharing and search engine indexing
+- **2025-01-13**: Implemented uploaded content library with database persistence and Library tab in Greenhouse
+- **2025-01-13**: Integrated PayPal donation system with professional modal and navbar Support button
+- **2025-01-13**: Achieved complete mobile/desktop feature parity - removed all mobile restrictions
+- **2025-01-13**: Fixed Discord authentication to use correct /api/auth/discord endpoints
+- **2025-01-13**: Made Greenhouse fully responsive with tabbed mobile layout for all 8 feature views
+- **2025-01-13**: Added hamburger menu navigation for mobile devices with dropdown menu
+- **2025-01-13**: Enhanced responsive design with proper breakpoints and touch-optimized controls
+- **2025-01-13**: Added custom scrollbar styles for improved mobile navigation experience
 
 The architecture prioritizes developer experience with TypeScript throughout, modern tooling, and clear separation of concerns while maintaining performance for image processing operations.
