@@ -21,19 +21,19 @@ export function UploadZone({ onJobCreated, onValidationStart, onValidationComple
 
   const validateMutation = useMutation({
     mutationFn: async (file: File) => {
-      console.log('Validating file:', file.name, 'Size:', file.size, 'Type:', file.type);
+      // Validating file
       onValidationStart?.();
       
       const formData = new FormData();
       formData.append("file", file);
 
-      console.log('Sending request to /api/validate');
+      // Sending validation request
       const response = await apiRequest("POST", "/api/validate", formData);
-      console.log('Validation response status:', response.status);
+      // Processing validation response
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Validation error response:', errorText);
+        // Validation error response
         throw new Error(`Validation failed: ${response.status} ${response.statusText}`);
       }
       
@@ -44,7 +44,7 @@ export function UploadZone({ onJobCreated, onValidationStart, onValidationComple
         title: "Validation complete",
         description: `Found ${data.issues?.length || 0} issues. Check the files panel for details.`,
       });
-      console.log('Validation result:', data);
+      // Validation complete
       onValidationComplete?.(data);
     },
     onError: (error) => {

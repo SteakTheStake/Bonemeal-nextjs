@@ -255,7 +255,7 @@ export function PhysicsWaterSystem() {
       // Auto-disable if performance is consistently poor
       if (performanceCheckCount > 60 && deltaTime > 33) { // 30fps threshold
         performanceDisabledRef.current = true;
-        console.log('Water system disabled due to poor performance');
+        // Water system disabled due to poor performance
         return;
       }
       

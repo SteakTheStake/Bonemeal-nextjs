@@ -6,7 +6,6 @@ import { useDeviceType } from "@/hooks/useDeviceType";
 import MobileNotice from "@/components/mobile-notice";
 import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
-import { TexturePreview } from "@/components/texture-preview";
 import { ConversionSettings } from "@/components/conversion-settings";
 import { AdvancedProcessing } from "@/components/advanced-processing";
 import { AdvancedInterpolation } from "@/components/advanced-interpolation";
@@ -22,7 +21,7 @@ import BatchProcessor from "@/components/batch-processor";
 import TextureQualityAnalyzer from "@/components/texture-quality-analyzer";
 import FavoritesPanel from "@/components/favorites-panel";
 import PresetsManager from "@/components/presets-manager";
-
+import { TexturePreview } from "@/components/texture-preview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
@@ -79,20 +78,13 @@ export default function Greenhouse() {
     { key: 'quality', label: 'Quality', icon: Settings, description: 'Texture quality analysis' },
   ];
 
-  // Simplified navigation for mobile - focused on viewing
+  // Mobile navigation is simpler
   const mobileNavigationItems = [
     { key: 'dashboard', label: 'Projects', icon: FolderOpen, description: 'View your projects' },
     { key: 'quality', label: 'Quality', icon: Settings, description: 'Texture analysis' },
   ];
 
   const navigationItems = isMobile ? mobileNavigationItems : desktopNavigationItems;
-
-  // Override default view for mobile to focus on projects
-  useEffect(() => {
-    if (isMobile && mainView === 'convert') {
-      setMainView('dashboard');
-    }
-  }, [isMobile, mainView]);
 
   return (
     <SettingsProvider>
@@ -168,51 +160,69 @@ export default function Greenhouse() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Favorites Panel */}
-        {!isMobile && (
-          <div className="w-64 border-r border-border/40 bg-background/60 backdrop-blur-sm">
-            <div className="p-4 h-full overflow-auto">
-              <div className="space-y-6">
-                <FavoritesPanel 
-                  onNavigateToSection={(sectionId) => setMainView(sectionId as any)} 
-                  currentSection={mainView} 
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Main View */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {mainView === 'convert' && !isMobile && (
-            <div className="flex-1 p-4 overflow-auto">
-              <div className="max-w-4xl mx-auto space-y-6">
-                <div className="text-center space-y-2">
-                  <h1 className="text-2xl font-bold text-foreground">Texture Converter</h1>
-                  <p className="text-muted-foreground">Transform your textures into LabPBR format</p>
+          {mainView === 'convert' && (
+            <div className="flex-1 flex">
+              {/* Left Panel - Upload & Settings */}
+              <div className="flex-1 flex flex-col border-r border-border/40">
+                <div className="p-4 overflow-auto">
+                  <UploadZone
+                    onJobCreated={(jobId) => setActiveJob(jobId)}
+                    onValidationStart={() => setIsValidating(true)}
+                    onValidationComplete={(results) => {
+                      setValidationResults(results);
+                      setIsValidating(false);
+                      // Auto-set preview texture if we have results
+                      if (results?.files?.length > 0) {
+                        const firstFile = results.files[0];
+                        setPreviewTexture({
+                          url: firstFile.url || '',
+                          name: firstFile.name || 'Texture',
+                          type: firstFile.type || 'albedo'
+                        });
+                      }
+                    }}
+                    onValidationError={() => setIsValidating(false)}
+                  />
                 </div>
-                
-                <UploadZone
-                  onJobCreated={(jobId) => setActiveJob(jobId)}
-                  onValidationStart={() => setIsValidating(true)}
-                  onValidationComplete={(results) => {
-                    setValidationResults(results);
-                    setIsValidating(false);
-                  }}
-                  onValidationError={() => setIsValidating(false)}
-                />
+              </div>
 
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="glass-card p-4">
+              {/* Middle Panel - Settings & Processing */}
+              <div className="w-96 flex flex-col border-r border-border/40 bg-background/60">
+                <Tabs defaultValue="basic" className="flex-1 flex flex-col">
+                  <TabsList className="grid w-full grid-cols-3 m-2">
+                    <TabsTrigger value="basic">Basic</TabsTrigger>
+                    <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                    <TabsTrigger value="interpolation">Interpolation</TabsTrigger>
+                  </TabsList>
+                  
+                  <div className="flex-1 overflow-hidden">
+                    <TabsContent value="basic" className="h-full m-0">
                       <ConversionSettings onJobCreated={(jobId) => setActiveJob(jobId)} />
-                    </div>
-                    <div className="glass-card p-4">
+                    </TabsContent>
+                    
+                    <TabsContent value="advanced" className="h-full m-0">
                       <AdvancedProcessing onJobCreated={(jobId) => setActiveJob(jobId)} />
-                    </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="interpolation" className="h-full m-0">
+                      <div className="p-4">
+                        <AdvancedInterpolation onSettingsChange={(settings) => {/* Advanced settings updated */}} />
+                      </div>
+                    </TabsContent>
                   </div>
-                  <AdvancedInterpolation onSettingsChange={(settings) => console.log('Advanced settings:', settings)} />
-                </div>
+                </Tabs>
+              </div>
+
+              {/* Right Panel - Preview */}
+              <div className="flex-1 flex flex-col">
+                <TexturePreview
+                  imageUrl={previewTexture?.url}
+                  imageName={previewTexture?.name}
+                  imageType={previewTexture?.type as any}
+                  onClose={() => setPreviewTexture(null)}
+                />
               </div>
             </div>
           )}
@@ -260,66 +270,58 @@ export default function Greenhouse() {
           )}
         </div>
 
-        {/* Right Panel - Progress & Tools */}
-        {!isMobile && (
+        {/* Right Sidebar - Status & Tools */}
+        {!isMobile && mainView === 'convert' && (
           <div className="w-80 border-l border-border/40 bg-background/60 backdrop-blur-sm flex flex-col">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 m-2">
-              <TabsTrigger value="progress" className="text-xs">
-                Progress
-              </TabsTrigger>
-              <TabsTrigger value="validation" className="text-xs">
-                Validate
-              </TabsTrigger>
-              <TabsTrigger value="batch" className="text-xs">
-                Batch
-              </TabsTrigger>
-              <TabsTrigger value="files" className="text-xs">
-                Files
-              </TabsTrigger>
-            </TabsList>
+              <TabsList className="grid w-full grid-cols-4 m-2">
+                <TabsTrigger value="progress" className="text-xs">Progress</TabsTrigger>
+                <TabsTrigger value="validation" className="text-xs">Validate</TabsTrigger>
+                <TabsTrigger value="batch" className="text-xs">Batch</TabsTrigger>
+                <TabsTrigger value="files" className="text-xs">Files</TabsTrigger>
+              </TabsList>
 
-            <div className="flex-1 overflow-hidden">
-              <TabsContent value="progress" className="h-full m-0">
-                <div className="h-full">
+              <div className="flex-1 overflow-hidden">
+                <TabsContent value="progress" className="h-full m-0">
                   <ProgressPanel
                     job={job}
                     processingStatus={processingStatus as any}
                   />
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="validation" className="h-full m-0">
-                <div className="h-full">
+                <TabsContent value="validation" className="h-full m-0">
                   <ValidationPanel
                     job={job}
                     textureFiles={textureFiles as any}
                   />
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="batch" className="h-full m-0">
-                <div className="h-full">
+                <TabsContent value="batch" className="h-full m-0">
                   <BatchPanel
                     jobs={jobs || []}
                     onJobSelect={(jobId) => setActiveJob(jobId)}
                     activeJob={activeJob}
                   />
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="files" className="h-full m-0">
-                <div className="h-full">
+                <TabsContent value="files" className="h-full m-0">
                   <FilesPanel
                     selectedJob={job || null}
                     validationResults={validationResults}
                     isValidating={isValidating}
                   />
-                </div>
-              </TabsContent>
+                </TabsContent>
+              </div>
+            </Tabs>
+
+            {/* Favorites Quick Access */}
+            <div className="border-t border-border/40 p-4">
+              <FavoritesPanel 
+                onNavigateToSection={(sectionId) => setMainView(sectionId as any)} 
+                currentSection={mainView} 
+              />
             </div>
-          </Tabs>
-        </div>
+          </div>
         )}
       </div>
     </div>
