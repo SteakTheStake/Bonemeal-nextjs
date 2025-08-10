@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scrollbar Styles for Mobile Navigation */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.3) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary) / 0.3);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary) / 0.5);
+}
+
 :root {
   /* Chalky Bonemeal Light Mode - Bright chalky tones with darker text */
   --background: hsl(40, 15%, 92%);
