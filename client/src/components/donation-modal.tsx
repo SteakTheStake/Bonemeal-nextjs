@@ -104,7 +104,7 @@ export function DonationModal({ open, onOpenChange }: DonationModalProps) {
             </div>
 
             {/* PayPal Button Container */}
-            <div className="flex justify-center pt-4">
+            <div className="justify-center pt-4">
               <div id="paypal-container-NDJTQ8ZHPASRW"></div>
             </div>
 
