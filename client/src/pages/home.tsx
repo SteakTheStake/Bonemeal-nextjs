@@ -60,12 +60,12 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background organic-bg relative">
+    <div className="min-h-screen bg-background organic-bg relative no-horizontal-scroll">
       <RainAnimation />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-        <div className="container mx-auto px-6 py-24 relative">
+        <div className="container mx-auto px-6 py-24 relative max-w-full">
           <div className="text-center max-w-4xl mx-auto">
             <div className="flex justify-center mb-6">
               <img 

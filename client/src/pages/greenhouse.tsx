@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "wouter";
-import { Box, HelpCircle, Settings, Plus, FolderOpen, Sparkles, Brush, Package, Zap, Home, Leaf } from "lucide-react";
+import { Box, HelpCircle, Settings, Plus, FolderOpen, Sparkles, Brush, Package, Zap, Home, Leaf, Minimize2, Maximize2, PanelLeft, PanelRight, PanelTop, PanelBottom } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { UploadZone } from "@/components/upload-zone";
@@ -23,12 +23,12 @@ import PresetsManager from "@/components/presets-manager";
 import { TexturePreview } from "@/components/texture-preview";
 import { UploadedContent } from "@/components/uploaded-content";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 import { SettingsProvider } from "@/contexts/settings-context";
 
 export default function Greenhouse() {
-
   const searchParams = useSearch();
   const projectId = searchParams ? parseInt(searchParams.replace('?project=', '')) : undefined;
   const [activeJob, setActiveJob] = useState<number | null>(null);
@@ -37,10 +37,25 @@ export default function Greenhouse() {
   const [isValidating, setIsValidating] = useState(false);
   const [mainView, setMainView] = useState<'convert' | 'dashboard' | 'editor' | 'ai' | 'templates' | 'batch' | 'quality' | 'library'>('convert');
   const [previewTexture, setPreviewTexture] = useState<{url: string, name: string, type: string} | null>(null);
+  
+  // Panel management state
+  const [panelStates, setPanelStates] = useState({
+    leftPanel: { collapsed: false, size: 25 },
+    centerPanel: { collapsed: false, size: 50 },
+    rightPanel: { collapsed: false, size: 25 },
+    bottomPanel: { collapsed: false, size: 30 }
+  });
+  
+  const togglePanel = (panel: keyof typeof panelStates) => {
+    setPanelStates(prev => ({
+      ...prev,
+      [panel]: { ...prev[panel], collapsed: !prev[panel].collapsed }
+    }));
+  };
 
   const { data: jobs } = useQuery<ConversionJob[]>({
     queryKey: ["/api/jobs"],
-    refetchInterval: 1000, // Refresh every second for live updates
+    refetchInterval: 1000,
   });
 
   const { data: job } = useQuery<ConversionJob>({
@@ -67,7 +82,6 @@ export default function Greenhouse() {
     }
   }, [jobs, activeJob]);
 
-  // All navigation items available for both desktop and mobile
   const navigationItems = [
     { key: 'convert', label: 'Convert', icon: Zap, description: 'Upload & convert textures' },
     { key: 'dashboard', label: 'Projects', icon: FolderOpen, description: 'Manage your projects' },
@@ -81,312 +95,301 @@ export default function Greenhouse() {
 
   return (
     <SettingsProvider>
-      <div className="h-screen flex flex-col bg-background text-foreground organic-bg vine-texture transition-colors duration-300">
-      {/* Top Menu Bar */}
-      <header className="glass-card moss-texture border-b living-border px-2 sm:px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <img 
-              src={bonemeaLogo} 
-              alt="Bonemeal" 
-              className="w-5 h-5 sm:w-6 sm:h-6 floating" 
-              style={{ imageRendering: 'pixelated' }}
-            />
-            <span className="text-sm sm:text-lg font-semibold text-primary">Greenhouse</span>
+      <div className="h-screen flex flex-col bg-background text-foreground organic-bg vine-texture transition-colors duration-300 no-horizontal-scroll">
+        {/* Top Menu Bar */}
+        <header className="glass-card moss-texture border-b living-border px-4 py-2 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <img 
+                src={bonemeaLogo} 
+                alt="Bonemeal" 
+                className="w-6 h-6 floating" 
+                style={{ imageRendering: 'pixelated' }}
+              />
+              <span className="text-lg font-semibold text-primary">Greenhouse</span>
+            </div>
+            <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
+              <Leaf className="w-3 h-3" />
+              <span>Flexible texture workspace</span>
+            </div>
           </div>
-          <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
-            <Leaf className="w-3 h-3" />
-            <span>Where textures grow</span>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-1 sm:gap-2">
-          <Link href="/projects">
-            <Button variant="outline" size="sm" className="glass-card px-2 sm:px-3">
-              <FolderOpen className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Projects</span>
-            </Button>
-          </Link>
-          <Link href="/">
-            <Button variant="outline" size="sm" className="glass-card px-2 sm:px-3">
-              <Home className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">Home</span>
-            </Button>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Navigation */}
-      <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-thin">
-            {navigationItems.map(({ key, label, icon: Icon, description }) => (
-              <Button
-                key={key}
-                variant={mainView === key ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setMainView(key as any)}
-                className={`flex-shrink-0 flex items-center gap-1 sm:gap-2 transition-all duration-200 px-2 sm:px-3 ${
-                  mainView === key 
-                    ? "bg-primary/20 text-primary border border-primary/30" 
-                    : "hover:bg-accent/10 text-muted-foreground hover:text-foreground"
-                }`}
-                title={description}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline text-xs sm:text-sm">{label}</span>
-                <span className="sm:hidden text-xs">{label.slice(0, 3)}</span>
+          
+          <div className="flex items-center gap-2">
+            <Link href="/projects">
+              <Button variant="outline" size="sm" className="glass-card">
+                <FolderOpen className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Projects</span>
               </Button>
-            ))}
+            </Link>
+            <Link href="/">
+              <Button variant="outline" size="sm" className="glass-card">
+                <Home className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Home</span>
+              </Button>
+            </Link>
+          </div>
+        </header>
+
+        {/* Main Navigation */}
+        <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm flex-shrink-0">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-1 py-2 greenhouse-scroll overflow-x-auto">
+              {navigationItems.map(({ key, label, icon: Icon, description }) => (
+                <Button
+                  key={key}
+                  variant={mainView === key ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setMainView(key as any)}
+                  className={`flex-shrink-0 flex items-center gap-2 transition-all duration-200 px-3 ${
+                    mainView === key 
+                      ? "bg-primary/20 text-primary border border-primary/30" 
+                      : "hover:bg-accent/10 text-muted-foreground hover:text-foreground"
+                  }`}
+                  title={description}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="text-sm">{label}</span>
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Main View */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {mainView === 'convert' && (
-            <div className="flex-1 flex flex-col lg:flex-row">
-              {/* Mobile/Tablet Layout: Stack Panels */}
-              <div className="lg:hidden flex-1 flex flex-col">
-                <Tabs defaultValue="upload" className="flex-1 flex flex-col">
-                  <TabsList className="grid grid-cols-3 m-2">
-                    <TabsTrigger value="upload">Upload</TabsTrigger>
-                    <TabsTrigger value="settings">Settings</TabsTrigger>
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                  </TabsList>
-                  
-                  <div className="flex-1 overflow-hidden">
-                    <TabsContent value="upload" className="h-full m-0 p-4">
-                      <UploadZone
-                        onJobCreated={(jobId) => setActiveJob(jobId)}
-                        onValidationStart={() => setIsValidating(true)}
-                        onValidationComplete={(results) => {
-                          setValidationResults(results);
-                          setIsValidating(false);
-                          if (results?.files?.length > 0) {
-                            const firstFile = results.files[0];
-                            setPreviewTexture({
-                              url: firstFile.url || '',
-                              name: firstFile.name || 'Texture',
-                              type: firstFile.type || 'albedo'
-                            });
-                          }
-                        }}
-                        onValidationError={() => setIsValidating(false)}
-                      />
-                    </TabsContent>
-                    
-                    <TabsContent value="settings" className="h-full m-0">
-                      <Tabs defaultValue="basic" className="flex-1 flex flex-col">
-                        <TabsList className="grid w-full grid-cols-3 m-2">
-                          <TabsTrigger value="basic">Basic</TabsTrigger>
-                          <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                          <TabsTrigger value="interpolation">Interp.</TabsTrigger>
-                        </TabsList>
-                        
+        {/* Resizable Workspace */}
+        <div className="flex-1 overflow-hidden">
+          <ResizablePanelGroup direction="vertical" className="h-full">
+            {/* Main Horizontal Panel Group */}
+            <ResizablePanel defaultSize={70} minSize={50}>
+              <ResizablePanelGroup direction="horizontal" className="h-full">
+                
+                {/* Left Panel - Tools & Navigation */}
+                {!panelStates.leftPanel.collapsed && (
+                  <>
+                    <ResizablePanel defaultSize={25} minSize={15} maxSize={40} className="relative">
+                      <div className="h-full flex flex-col bg-card/50 border-r border-border/40">
+                        <div className="flex items-center justify-between p-2 border-b border-border/40 bg-background/60">
+                          <div className="flex items-center gap-2">
+                            <PanelLeft className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">Tools</span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => togglePanel('leftPanel')}
+                            className="p-1 h-6 w-6"
+                          >
+                            <Minimize2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                         <div className="flex-1 overflow-hidden">
-                          <TabsContent value="basic" className="h-full m-0">
-                            <ConversionSettings onJobCreated={(jobId) => setActiveJob(jobId)} />
+                          <div className="h-full greenhouse-scroll overflow-y-auto p-2">
+                            <div className="space-y-2">
+                              {navigationItems.map(({ key, label, icon: Icon, description }) => (
+                                <Button
+                                  key={key}
+                                  variant={mainView === key ? "default" : "ghost"}
+                                  size="sm"
+                                  onClick={() => setMainView(key as any)}
+                                  className={`w-full justify-start gap-2 transition-all duration-200 ${
+                                    mainView === key 
+                                      ? "moss-texture border-primary/30" 
+                                      : "hover:bg-accent/10"
+                                  }`}
+                                  title={description}
+                                >
+                                  <Icon className="w-4 h-4" />
+                                  <span className="text-sm">{label}</span>
+                                </Button>
+                              ))}
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-border/40">
+                              <FavoritesPanel />
+                              <div className="mt-4">
+                                <PresetsManager />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ResizablePanel>
+                    <ResizableHandle withHandle />
+                  </>
+                )}
+                
+                {/* Center Panel - Main Content */}
+                <ResizablePanel defaultSize={panelStates.leftPanel.collapsed ? 75 : 50} minSize={30}>
+                  <div className="h-full flex flex-col bg-background">
+                    <div className="flex items-center justify-between p-2 border-b border-border/40 bg-card/30">
+                      <div className="flex items-center gap-2">
+                        {panelStates.leftPanel.collapsed && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => togglePanel('leftPanel')}
+                            className="p-1 h-6 w-6"
+                          >
+                            <PanelLeft className="w-3 h-3" />
+                          </Button>
+                        )}
+                        <span className="text-sm font-medium capitalize">{mainView} Workspace</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {panelStates.rightPanel.collapsed && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => togglePanel('rightPanel')}
+                            className="p-1 h-6 w-6"
+                          >
+                            <PanelRight className="w-3 h-3" />
+                          </Button>
+                        )}
+                        {panelStates.bottomPanel.collapsed && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => togglePanel('bottomPanel')}
+                            className="p-1 h-6 w-6"
+                          >
+                            <PanelBottom className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <div className="h-full greenhouse-scroll overflow-auto p-4">
+                        {/* Main View Content */}
+                        {mainView === 'convert' && (
+                          <div className="space-y-4">
+                            <UploadZone 
+                              onFileProcessed={setActiveJob}
+                              projectId={projectId}
+                            />
+                            <ConversionSettings />
+                            <AdvancedProcessing />
+                            <AdvancedInterpolation />
+                          </div>
+                        )}
+                        {mainView === 'dashboard' && <EnhancedProjectDashboard />}
+                        {mainView === 'library' && <UploadedContent />}
+                        {mainView === 'editor' && <TextureEditor />}
+                        {mainView === 'ai' && <AITextureGenerator />}
+                        {mainView === 'templates' && <TemplateLibrary />}
+                        {mainView === 'batch' && <BatchProcessor />}
+                        {mainView === 'quality' && <TextureQualityAnalyzer />}
+                      </div>
+                    </div>
+                  </div>
+                </ResizablePanel>
+                
+                {/* Right Panel - Preview & Settings */}
+                {!panelStates.rightPanel.collapsed && (
+                  <>
+                    <ResizableHandle withHandle />
+                    <ResizablePanel defaultSize={25} minSize={15} maxSize={40}>
+                      <div className="h-full flex flex-col bg-card/50 border-l border-border/40">
+                        <div className="flex items-center justify-between p-2 border-b border-border/40 bg-background/60">
+                          <div className="flex items-center gap-2">
+                            <PanelRight className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">Preview</span>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => togglePanel('rightPanel')}
+                            className="p-1 h-6 w-6"
+                          >
+                            <Minimize2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="h-full greenhouse-scroll overflow-y-auto p-2">
+                            <TexturePreview 
+                              texture={previewTexture}
+                              onClose={() => setPreviewTexture(null)}
+                            />
+                            {activeJob && (
+                              <div className="mt-4 space-y-4">
+                                <ValidationPanel 
+                                  validationResults={validationResults}
+                                  isValidating={isValidating}
+                                  onValidate={() => {}}
+                                />
+                                <FilesPanel 
+                                  textureFiles={textureFiles}
+                                  onPreview={setPreviewTexture}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </ResizablePanel>
+                  </>
+                )}
+              </ResizablePanelGroup>
+            </ResizablePanel>
+            
+            {/* Bottom Panel - Progress & Logs */}
+            {!panelStates.bottomPanel.collapsed && (
+              <>
+                <ResizableHandle withHandle />
+                <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+                  <div className="h-full flex flex-col bg-card/30 border-t border-border/40">
+                    <div className="flex items-center justify-between p-2 border-b border-border/40 bg-background/60">
+                      <div className="flex items-center gap-2">
+                        <PanelBottom className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Progress & Logs</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => togglePanel('bottomPanel')}
+                        className="p-1 h-6 w-6"
+                      >
+                        <Minimize2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+                        <TabsList className="grid grid-cols-3 m-2">
+                          <TabsTrigger value="progress">Progress</TabsTrigger>
+                          <TabsTrigger value="batch">Batch</TabsTrigger>
+                          <TabsTrigger value="validation">Validation</TabsTrigger>
+                        </TabsList>
+                        <div className="flex-1 overflow-hidden">
+                          <TabsContent value="progress" className="h-full m-0">
+                            <div className="h-full greenhouse-scroll overflow-auto p-2">
+                              <ProgressPanel 
+                                job={job}
+                                processingStatus={processingStatus}
+                              />
+                            </div>
                           </TabsContent>
-                          
-                          <TabsContent value="advanced" className="h-full m-0">
-                            <AdvancedProcessing onJobCreated={(jobId) => setActiveJob(jobId)} />
+                          <TabsContent value="batch" className="h-full m-0">
+                            <div className="h-full greenhouse-scroll overflow-auto p-2">
+                              <BatchPanel />
+                            </div>
                           </TabsContent>
-                          
-                          <TabsContent value="interpolation" className="h-full m-0">
-                            <div className="p-4">
-                              <AdvancedInterpolation onSettingsChange={(settings) => {/* Advanced settings updated */}} />
+                          <TabsContent value="validation" className="h-full m-0">
+                            <div className="h-full greenhouse-scroll overflow-auto p-2">
+                              <ValidationPanel 
+                                validationResults={validationResults}
+                                isValidating={isValidating}
+                                onValidate={() => {}}
+                              />
                             </div>
                           </TabsContent>
                         </div>
                       </Tabs>
-                    </TabsContent>
-                    
-                    <TabsContent value="preview" className="h-full m-0">
-                      <TexturePreview
-                        imageUrl={previewTexture?.url}
-                        imageName={previewTexture?.name}
-                        imageType={previewTexture?.type as any}
-                        onClose={() => setPreviewTexture(null)}
-                      />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </div>
-
-              {/* Desktop Layout: Side by Side */}
-              <div className="hidden lg:flex flex-1">
-                {/* Left Panel - Upload & Settings */}
-                <div className="flex-1 flex flex-col border-r border-border/40">
-                  <div className="p-4 overflow-auto">
-                    <UploadZone
-                      onJobCreated={(jobId) => setActiveJob(jobId)}
-                      onValidationStart={() => setIsValidating(true)}
-                      onValidationComplete={(results) => {
-                        setValidationResults(results);
-                        setIsValidating(false);
-                        if (results?.files?.length > 0) {
-                          const firstFile = results.files[0];
-                          setPreviewTexture({
-                            url: firstFile.url || '',
-                            name: firstFile.name || 'Texture',
-                            type: firstFile.type || 'albedo'
-                          });
-                        }
-                      }}
-                      onValidationError={() => setIsValidating(false)}
-                    />
-                  </div>
-                </div>
-
-                {/* Middle Panel - Settings & Processing */}
-                <div className="w-96 flex flex-col border-r border-border/40 bg-background/60">
-                  <Tabs defaultValue="basic" className="flex-1 flex flex-col">
-                    <TabsList className="grid w-full grid-cols-3 m-2">
-                      <TabsTrigger value="basic">Basic</TabsTrigger>
-                      <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                      <TabsTrigger value="interpolation">Interpolation</TabsTrigger>
-                    </TabsList>
-                    
-                    <div className="flex-1 overflow-hidden">
-                      <TabsContent value="basic" className="h-full m-0">
-                        <ConversionSettings onJobCreated={(jobId) => setActiveJob(jobId)} />
-                      </TabsContent>
-                      
-                      <TabsContent value="advanced" className="h-full m-0">
-                        <AdvancedProcessing onJobCreated={(jobId) => setActiveJob(jobId)} />
-                      </TabsContent>
-                      
-                      <TabsContent value="interpolation" className="h-full m-0">
-                        <div className="p-4">
-                          <AdvancedInterpolation onSettingsChange={(settings) => {/* Advanced settings updated */}} />
-                        </div>
-                      </TabsContent>
                     </div>
-                  </Tabs>
-                </div>
-
-                {/* Right Panel - Preview */}
-                <div className="flex-1 flex flex-col">
-                  <TexturePreview
-                    imageUrl={previewTexture?.url}
-                    imageName={previewTexture?.name}
-                    imageType={previewTexture?.type as any}
-                    onClose={() => setPreviewTexture(null)}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {mainView === 'dashboard' && (
-            <div className="flex-1 p-4 overflow-auto">
-              <EnhancedProjectDashboard />
-            </div>
-          )}
-
-          {mainView === 'editor' && (
-            <div className="flex-1 p-4 overflow-auto">
-              <TextureEditor />
-            </div>
-          )}
-
-          {mainView === 'ai' && (
-            <div className="flex-1 p-4 overflow-auto">
-              <AITextureGenerator />
-            </div>
-          )}
-
-          {mainView === 'templates' && (
-            <div className="flex-1 p-4 overflow-auto">
-              <TemplateLibrary />
-            </div>
-          )}
-
-          {mainView === 'batch' && (
-            <div className="flex-1 p-4 overflow-auto">
-              <BatchProcessor />
-            </div>
-          )}
-
-          {mainView === 'quality' && (
-            <div className="flex-1 p-4 overflow-auto">
-              <div className="max-w-4xl mx-auto">
-                <div className="text-center space-y-2 mb-8">
-                  <h1 className="text-2xl font-bold text-foreground">Quality Analyzer</h1>
-                  <p className="text-muted-foreground">Analyze texture quality and get optimization recommendations</p>
-                </div>
-                <TextureQualityAnalyzer />
-              </div>
-            </div>
-          )}
-
-          {mainView === 'library' && (
-            <div className="flex-1 overflow-hidden">
-              <UploadedContent />
-            </div>
-          )}
+                  </div>
+                </ResizablePanel>
+              </>
+            )}
+          </ResizablePanelGroup>
         </div>
-
-        {/* Right Sidebar - Status & Tools (Desktop only) */}
-        {mainView === 'convert' && (
-          <div className="hidden xl:flex w-80 border-l border-border/40 bg-background/60 backdrop-blur-sm flex-col">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-              <TabsList className="grid w-full grid-cols-4 m-2">
-                <TabsTrigger value="progress" className="text-xs">Progress</TabsTrigger>
-                <TabsTrigger value="validation" className="text-xs">Validate</TabsTrigger>
-                <TabsTrigger value="batch" className="text-xs">Batch</TabsTrigger>
-                <TabsTrigger value="files" className="text-xs">Files</TabsTrigger>
-              </TabsList>
-
-              <div className="flex-1 overflow-hidden">
-                <TabsContent value="progress" className="h-full m-0">
-                  <ProgressPanel
-                    job={job}
-                    processingStatus={processingStatus as any}
-                  />
-                </TabsContent>
-
-                <TabsContent value="validation" className="h-full m-0">
-                  <ValidationPanel
-                    job={job}
-                    textureFiles={textureFiles as any}
-                  />
-                </TabsContent>
-
-                <TabsContent value="batch" className="h-full m-0">
-                  <BatchPanel
-                    jobs={jobs || []}
-                    onJobSelect={(jobId) => setActiveJob(jobId)}
-                    activeJob={activeJob}
-                  />
-                </TabsContent>
-
-                <TabsContent value="files" className="h-full m-0">
-                  <FilesPanel
-                    selectedJob={job || null}
-                    validationResults={validationResults}
-                    isValidating={isValidating}
-                  />
-                </TabsContent>
-              </div>
-            </Tabs>
-
-            {/* Favorites Quick Access */}
-            <div className="border-t border-border/40 p-4">
-              <FavoritesPanel 
-                onNavigateToSection={(sectionId) => setMainView(sectionId as any)} 
-                currentSection={mainView} 
-              />
-            </div>
-          </div>
-        )}
       </div>
-    </div>
     </SettingsProvider>
   );
 }
