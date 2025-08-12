@@ -22,7 +22,7 @@ async function processFileAsync(jobId: number, fileBuffer: Buffer, settings: Con
       await storage.updateProcessingStatus(jobId, {
         ...currentStatus,
         ...updates,
-        elapsedTime: Date.now() - (currentStatus.startTime || Date.now())
+        elapsedTime: currentStatus.elapsedTime + 1000
       });
     }
   };
@@ -211,12 +211,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects routes
   app.get("/api/projects", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const projects = await storage.getProjectsByUserId(userId);
+      const projects = await storage.getAllProjects(userId);
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       const projectId = parseInt(req.params.id);
 
       if (!userId) {
@@ -274,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       const projectId = parseInt(req.params.id);
 
       if (!userId) {
@@ -300,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       const projectId = parseInt(req.params.id);
 
       if (!userId) {
@@ -327,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User presets routes
   app.get("/api/presets", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -342,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/presets", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -372,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/presets/:id", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       const presetId = parseInt(req.params.id);
 
       if (!userId) {
@@ -389,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/presets/:id/default", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       const presetId = parseInt(req.params.id);
 
       if (!userId) {
@@ -407,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User favorites routes
   app.get("/api/favorites", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -422,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/favorites", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/favorites/:id", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       const favoriteId = parseInt(req.params.id);
 
       if (!userId) {
@@ -462,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/favorites/reorder", isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.id;
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
