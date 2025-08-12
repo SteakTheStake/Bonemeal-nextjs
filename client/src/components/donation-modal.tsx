@@ -27,11 +27,12 @@ export function DonationModal({ open, onOpenChange }: DonationModalProps) {
     if (!open) return;
 
     // Load PayPal SDK script
-    if (!document.getElementById('paypal-sdk-script')) {
-      const script = document.createElement('script');
-      script.id = 'paypal-sdk-script';
-      script.src = 'https://www.paypal.com/sdk/js?client-id=BAA4chfuJOgsM92_WRqwB3YoEzHyuEx7Tg-e8dKs51gkpyD20daP_WYOkoFE7rTyyGITdyBVaKrbxF2O_Y&components=hosted-buttons&enable-funding=venmo&currency=USD';
-      script.crossOrigin = 'anonymous';
+    if (!document.getElementById("paypal-sdk-script")) {
+      const script = document.createElement("script");
+      script.id = "paypal-sdk-script";
+      script.src =
+        "https://www.paypal.com/sdk/js?client-id=BAA4chfuJOgsM92_WRqwB3YoEzHyuEx7Tg-e8dKs51gkpyD20daP_WYOkoFE7rTyyGITdyBVaKrbxF2O_Y&components=hosted-buttons&enable-funding=venmo&currency=USD";
+      script.crossOrigin = "anonymous";
       script.async = true;
       script.onload = () => {
         setScriptLoaded(true);
@@ -48,9 +49,11 @@ export function DonationModal({ open, onOpenChange }: DonationModalProps) {
     // Wait for PayPal to be available
     const initPayPal = () => {
       if (window.paypal && window.paypal.HostedButtons) {
-        window.paypal.HostedButtons({
-          hostedButtonId: "NDJTQ8ZHPASRW"
-        }).render("#paypal-container-NDJTQ8ZHPASRW");
+        window.paypal
+          .HostedButtons({
+            hostedButtonId: "NDJTQ8ZHPASRW",
+          })
+          .render("#paypal-container-NDJTQ8ZHPASRW");
       } else {
         setTimeout(initPayPal, 100);
       }
@@ -64,11 +67,11 @@ export function DonationModal({ open, onOpenChange }: DonationModalProps) {
       <DialogContent className="sm:max-w-md glass-card moss-texture">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <img 
-              src={bonemeaLogo} 
-              alt="Bonemeal" 
+            <img
+              src={bonemeaLogo}
+              alt="Bonemeal"
               className="w-6 h-6"
-              style={{ imageRendering: 'pixelated' }}
+              style={{ imageRendering: "pixelated" }}
             />
             Support Bonemeal Development
             <Heart className="h-5 w-5 text-pink-500" />
@@ -77,15 +80,16 @@ export function DonationModal({ open, onOpenChange }: DonationModalProps) {
             <div className="flex items-center gap-2 text-muted-foreground">
               <Coffee className="h-4 w-4" />
               <p>
-                This app is developed and maintained as a passion project, 
+                This app is developed and maintained as a passion project,
                 funded entirely by personal income.
               </p>
             </div>
-            
+
             <p className="text-sm">
-              Your support helps keep Bonemeal free and actively developed with new features. 
-              Every contribution, no matter the size, makes a real difference in maintaining 
-              and improving this tool for the Minecraft community.
+              Your support helps keep Bonemeal free and actively developed with
+              new features. Every contribution, no matter the size, makes a real
+              difference in maintaining and improving this tool for the
+              Minecraft community.
             </p>
 
             <div className="bg-background/50 rounded-lg p-4 border border-border/50">
