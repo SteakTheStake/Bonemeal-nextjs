@@ -323,18 +323,7 @@ export class MemStorage implements IStorage {
     return project;
   }
 
-  async shareProject(projectId: number, sharedByUserId: string, sharedWithUserId: string, permission: 'view' | 'edit'): Promise<ProjectShare> {
-    // For MemStorage, we'll just return a mock share object
-    return {
-      id: Date.now(),
-      projectId,
-      sharedByUserId,
-      sharedWithUserId,
-      permission,
-      joinedAt: new Date(),
-      createdAt: new Date()
-    };
-  }
+
 
   // User presets methods (mock implementation for MemStorage)
   async getUserPresets(userId: string): Promise<any[]> {

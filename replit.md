@@ -10,6 +10,15 @@ Branding: Minecraft enchanted bonemeal gif as logo, growth/productivity theme
 Theme: Bright chalky glassmorphism with earthy off-white textures and subtle organic patterns
 Visual style: Living, growing elements with glassmorphism effects, moss and vine textures, bright chalky backgrounds
 
+## Recent Changes
+- **January 13, 2025**: Added comprehensive Discord integration for project sharing and collaboration
+  - Built Discord OAuth2 authentication system with secure session management
+  - Created mobile and desktop Discord sharing interfaces with touch optimization
+  - Implemented friend selection, permission management (view/edit), and invite links
+  - Added backend API routes for all sharing operations and collaborator management
+  - Fixed routing issues with dedicated project detail pages
+  - Enhanced mobile layout with responsive design patterns
+
 ## System Architecture
 
 The application employs a modern full-stack architecture, ensuring clear separation of concerns and a robust foundation.
@@ -30,13 +39,14 @@ The application employs a modern full-stack architecture, ensuring clear separat
 - **Database**: PostgreSQL with Drizzle ORM
 - **Image Processing**: Sharp for high-performance image manipulation. Includes advanced features like bulk resizing with independent resolution control per map, smart interpolation (nearest, linear, cubic, lanczos) per texture type, compression with dithering, and CTM Split for OptiFine Connected Textures.
 - **File Handling**: Multer for multipart/form-data.
-- **Core Process**: Handles texture processing, LabPBR validation, and resource pack management (extraction/creation).
+- **Authentication**: Discord OAuth2 integration for seamless user access and project collaboration
+- **Core Process**: Handles texture processing, LabPBR validation, resource pack management, and project sharing
 
 ### System Design Choices
 - **Database Schema**: Uses `conversion_jobs` to track tasks and `texture_files` for file information and validation results.
 - **Data Flow**: Users upload files, which are processed server-side, validated against LabPBR standards, and progress is reported via polling. Converted textures are then available for download.
 - **Scalability**: Designed for both development (Vite, tsx) and production (optimized static assets, esbuild) environments.
-- **Key Features**: Real-time progress updates, batch processing, LabPBR validation, dark theme, mobile responsiveness, PWA capabilities, SEO optimization, and advanced texture processing tools including AI upscaling.
+- **Key Features**: Real-time progress updates, batch processing, LabPBR validation, Discord collaboration system with project sharing, mobile-first responsive design, PWA capabilities, SEO optimization, and advanced texture processing tools including AI upscaling.
 
 ## External Dependencies
 

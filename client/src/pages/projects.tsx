@@ -258,7 +258,7 @@ export default function Projects() {
                       Status: {project.status}
                     </div>
                   </div>
-                  <Link href={`/converter?project=${project.id}`}>
+                  <Link href={`/projects/${project.id}`}>
                     <Button className="w-full mt-4 grow-button moss-texture">
                       <FolderOpen className="h-4 w-4 mr-2" />
                       Open Project
