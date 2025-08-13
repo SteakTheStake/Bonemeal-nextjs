@@ -138,7 +138,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
           <div>
             <h1 className="text-lg font-bold text-primary">Bonemeal</h1>
             <p className="text-xs text-muted-foreground">
-              {user ? `Welcome, ${user.username}` : 'Mobile Texture Lab'}
+              {user ? `Welcome, ${(user as any).username}` : 'Mobile Texture Lab'}
             </p>
           </div>
         </div>

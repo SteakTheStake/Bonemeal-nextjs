@@ -335,6 +335,8 @@ export class MemStorage implements IStorage {
     const newContent: UploadedContent = {
       id: this.currentUploadedContentId++,
       ...content,
+      fileUrl: content.fileUrl || null,
+      thumbnailUrl: content.thumbnailUrl || null,
       metadata: content.metadata || null,
       uploadDate: new Date()
     };

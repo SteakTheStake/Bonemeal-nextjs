@@ -184,23 +184,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User info endpoint
-  app.get('/api/auth/user', isOptionallyAuthenticated, async (req: any, res) => {
+  // User info endpoint (already provided by discordAuth.ts)
+  // app.get('/api/auth/user') is handled by Discord auth setup
+  
+  // Protected routes example
+  app.get('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {
-      if (!req.user) {
-        return res.status(404).json(null);
-      }
-      
-      const userId = req.user.claims?.sub;
-      if (!userId) {
-        return res.status(404).json(null);
-      }
-      
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json(null);
-      }
-      
+      const user = req.user;
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
