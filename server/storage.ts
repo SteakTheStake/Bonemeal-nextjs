@@ -57,6 +57,8 @@ export class MemStorage implements IStorage {
   private currentJobId: number;
   private currentFileId: number;
   private currentUploadedContentId: number;
+  private projectShares: Map<number, ProjectShare>;
+  private currentProjectShareId: number;
 
   constructor() {
     this.users = new Map();
@@ -65,10 +67,12 @@ export class MemStorage implements IStorage {
     this.textureFiles = new Map();
     this.processingStatus = new Map();
     this.uploadedContent = new Map();
+    this.projectShares = new Map();
     this.currentProjectId = 1;
     this.currentJobId = 1;
     this.currentFileId = 1;
     this.currentUploadedContentId = 1;
+    this.currentProjectShareId = 1;
   }
 
   clearAllJobs() {
@@ -249,6 +253,50 @@ export class MemStorage implements IStorage {
   }
 
   // Project sharing methods
+  async shareProject(projectId: number, sharedByUserId: string, sharedWithUserId: string, permission: 'view' | 'edit'): Promise<ProjectShare> {
+    const share: ProjectShare = {
+      id: this.currentProjectShareId++,
+      projectId,
+      sharedByUserId,
+      sharedWithUserId: sharedWithUserId,
+      permission,
+      joinedAt: new Date(),
+      createdAt: new Date()
+    };
+    this.projectShares.set(share.id, share);
+    return share;
+  }
+
+  async getProjectShares(projectId: number): Promise<ProjectShare[]> {
+    return Array.from(this.projectShares.values()).filter(share => share.projectId === projectId);
+  }
+
+  async getUserProjectShares(userId: string): Promise<Project[]> {
+    const userShares = Array.from(this.projectShares.values()).filter(share => share.sharedWithUserId === userId);
+    const sharedProjects: Project[] = [];
+    
+    for (const share of userShares) {
+      const project = this.projects.get(share.projectId);
+      if (project) {
+        sharedProjects.push(project);
+      }
+    }
+    
+    return sharedProjects;
+  }
+
+  async removeProjectShare(projectId: number, userId: string): Promise<boolean> {
+    const sharesToRemove = Array.from(this.projectShares.entries()).filter(
+      ([_, share]) => share.projectId === projectId && (share.sharedByUserId === userId || share.sharedWithUserId === userId)
+    );
+    
+    for (const [id] of sharesToRemove) {
+      this.projectShares.delete(id);
+    }
+    
+    return sharesToRemove.length > 0;
+  }
+
   async generateProjectInvite(projectId: number, expiresInHours = 24): Promise<string> {
     const project = this.projects.get(projectId);
     if (!project) throw new Error(`Project ${projectId} not found`);

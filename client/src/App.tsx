@@ -12,6 +12,7 @@ import { MinecraftFarmlandFooter } from "@/components/water-drops";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Projects from "@/pages/projects";
+import ProjectDetail from "@/pages/project-detail";
 import Greenhouse from "@/pages/greenhouse";
 import Docs from "@/pages/docs";
 import JoinProject from "@/pages/join-project";
@@ -39,7 +40,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/projects" component={Projects} />
-          <Route path="/projects/:id" component={Projects} />
+          <Route path="/projects/:id" component={ProjectDetail} />
           <Route path="/docs" component={Docs} />
           <Route path="/join/:inviteCode" component={JoinProject} />
           <Route path="/login" component={Login} />
@@ -57,7 +58,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/projects" component={Projects} />
-          <Route path="/projects/:id" component={Projects} />
+          <Route path="/projects/:id" component={ProjectDetail} />
           <Route path="/greenhouse" component={Greenhouse} />
           <Route path="/docs" component={Docs} />
           <Route path="/join/:inviteCode" component={JoinProject} />
