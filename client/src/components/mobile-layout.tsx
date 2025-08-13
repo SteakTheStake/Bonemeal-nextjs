@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { 
   Upload, Settings, Eye, FolderOpen, Sparkles, Brush, Package, 
   Zap, Home, ChevronLeft, ChevronRight, Menu, X, Play, Pause,
-  CheckCircle, AlertCircle, Clock, ArrowUp, ArrowDown
+  CheckCircle, AlertCircle, Clock, ArrowUp, ArrowDown, User
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ import TextureQualityAnalyzer from "@/components/texture-quality-analyzer";
 import { TexturePreview } from "@/components/texture-preview";
 import { UploadedContent } from "@/components/uploaded-content";
 import MobileHome from "@/components/mobile-home";
+import AuthTooltip, { MobileAuthNotification } from "@/components/auth-tooltip";
+import { useAuth } from "@/hooks/useAuth";
 import { type ConversionJob } from "@shared/schema";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 
@@ -39,6 +41,7 @@ interface MobileLayoutProps {
 
 export default function MobileLayout({ children }: MobileLayoutProps) {
   const [location, setLocation] = useLocation();
+  const { user, isLoading } = useAuth();
   const [activeJob, setActiveJob] = useState<number | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -134,7 +137,9 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
           />
           <div>
             <h1 className="text-lg font-bold text-primary">Bonemeal</h1>
-            <p className="text-xs text-muted-foreground">Mobile Texture Lab</p>
+            <p className="text-xs text-muted-foreground">
+              {user ? `Welcome, ${user.username}` : 'Mobile Texture Lab'}
+            </p>
           </div>
         </div>
         
@@ -179,6 +184,28 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
                   </div>
                 </Button>
               </Link>
+              
+              {user ? (
+                <a href="/api/auth/logout">
+                  <Button variant="outline" className="w-full justify-start gap-3 h-12 text-red-500 hover:text-red-600">
+                    <X className="w-5 h-5" />
+                    <div className="text-left">
+                      <div className="font-medium">Logout</div>
+                      <div className="text-xs text-muted-foreground">Sign out of account</div>
+                    </div>
+                  </Button>
+                </a>
+              ) : (
+                <Link href="/login">
+                  <Button className="w-full justify-start gap-3 h-12 moss-texture">
+                    <User className="w-5 h-5" />
+                    <div className="text-left">
+                      <div className="font-medium">Login</div>
+                      <div className="text-xs text-muted-foreground">Access all features</div>
+                    </div>
+                  </Button>
+                </Link>
+              )}
             </div>
           </SheetContent>
         </Sheet>
@@ -274,6 +301,9 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
         ) : (
           children
         )}
+        
+        {/* Mobile Auth Notification */}
+        <MobileAuthNotification />
       </main>
 
       {/* Bottom Tab Bar for Quick Access */}
@@ -297,17 +327,21 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       {/* Floating Action Button for Quick Upload */}
       {location === '/greenhouse' && currentStep === 0 && (
         <div className="mobile-floating right-4">
-          <Button
-            size="lg"
-            className="rounded-full w-14 h-14 moss-texture floating"
-            onClick={() => {
-              // Trigger upload zone focus
-              const uploadInput = document.querySelector('input[type="file"]') as HTMLElement;
-              uploadInput?.click();
-            }}
-          >
-            <Upload className="w-6 h-6" />
-          </Button>
+          <AuthTooltip message="Login to save your converted textures and access advanced features">
+            <Button
+              size="lg"
+              className="rounded-full w-14 h-14 moss-texture floating"
+              onClick={() => {
+                if (user) {
+                  // Trigger upload zone focus
+                  const uploadInput = document.querySelector('input[type="file"]') as HTMLElement;
+                  uploadInput?.click();
+                }
+              }}
+            >
+              <Upload className="w-6 h-6" />
+            </Button>
+          </AuthTooltip>
         </div>
       )}
 

@@ -85,7 +85,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByDiscordId(discordId: string): Promise<User | undefined> {
-    for (const user of this.users.values()) {
+    for (const user of Array.from(this.users.values())) {
       if (user.discordId === discordId) {
         return user;
       }
@@ -123,10 +123,14 @@ export class MemStorage implements IStorage {
     const id = this.currentProjectId++;
     const project: Project = {
       id,
+      userId: insertProject.userId || null,
       name: insertProject.name,
       description: insertProject.description || null,
       status: insertProject.status || 'active',
       textureCount: 0,
+      isPublic: insertProject.isPublic || false,
+      inviteCode: null,
+      inviteExpiresAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -331,6 +335,7 @@ export class MemStorage implements IStorage {
     const newContent: UploadedContent = {
       id: this.currentUploadedContentId++,
       ...content,
+      metadata: content.metadata || null,
       uploadDate: new Date()
     };
     this.uploadedContent.set(newContent.id, newContent);

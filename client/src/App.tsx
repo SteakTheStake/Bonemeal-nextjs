@@ -15,6 +15,7 @@ import Projects from "@/pages/projects";
 import Greenhouse from "@/pages/greenhouse";
 import Docs from "@/pages/docs";
 import JoinProject from "@/pages/join-project";
+import Login from "@/pages/login";
 import { useState, useEffect } from "react";
 
 function Router() {
@@ -41,6 +42,7 @@ function Router() {
           <Route path="/projects/:id" component={Projects} />
           <Route path="/docs" component={Docs} />
           <Route path="/join/:inviteCode" component={JoinProject} />
+          <Route path="/login" component={Login} />
           <Route component={NotFound} />
         </Switch>
       </MobileLayout>
