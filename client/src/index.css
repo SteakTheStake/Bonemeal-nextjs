@@ -422,4 +422,75 @@
     max-width: 100%;
     box-sizing: border-box;
   }
+
+  /* Mobile-specific touch optimizations */
+  @media (max-width: 768px) {
+    /* Larger touch targets */
+    button, .btn, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Improved tap highlighting */
+    * {
+      -webkit-tap-highlight-color: hsl(var(--primary) / 0.2);
+    }
+
+    /* Mobile scrolling momentum */
+    .mobile-scroll {
+      -webkit-overflow-scrolling: touch;
+      overflow-scrolling: touch;
+    }
+
+    /* Safe area padding for mobile devices */
+    .mobile-safe-area {
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Mobile card spacing */
+    .mobile-card {
+      margin: 0.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px hsl(var(--foreground) / 0.1);
+    }
+
+    /* Mobile floating elements */
+    .mobile-floating {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom) + 1rem);
+      z-index: 50;
+      box-shadow: 0 4px 20px hsl(var(--foreground) / 0.2);
+    }
+
+    /* Mobile step indicator */
+    .mobile-progress {
+      background: linear-gradient(90deg, 
+        hsl(var(--primary)) 0%, 
+        hsl(var(--primary) / 0.8) 50%, 
+        hsl(var(--primary)) 100%);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    /* Mobile glass effect enhancement */
+    .mobile-glass {
+      background: hsl(var(--background) / 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid hsl(var(--border) / 0.3);
+    }
+  }
+
+  /* Mobile landscape optimizations */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .mobile-landscape-compact {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+    
+    .mobile-landscape-header {
+      height: 60px;
+    }
+  }
 }
