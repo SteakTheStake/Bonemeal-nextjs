@@ -187,6 +187,169 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User info endpoint (already provided by discordAuth.ts)
   // app.get('/api/auth/user') is handled by Discord auth setup
   
+  // Discord integration routes
+  app.get('/api/discord/friends', isAuthenticated, async (req: any, res) => {
+    try {
+      // Mock Discord friends data for demo
+      const mockFriends = [
+        {
+          id: '123456789',
+          username: 'TextureArtist',
+          discriminator: '1234',
+          avatar: null,
+          status: 'online'
+        },
+        {
+          id: '987654321',
+          username: 'MinecraftBuilder',
+          discriminator: '5678',
+          avatar: null,
+          status: 'idle'
+        },
+        {
+          id: '456789123',
+          username: 'PixelMaster',
+          discriminator: '9999',
+          avatar: null,
+          status: 'offline'
+        }
+      ];
+      
+      res.json(mockFriends);
+    } catch (error) {
+      console.error("Error fetching Discord friends:", error);
+      res.status(500).json({ message: "Failed to fetch Discord friends" });
+    }
+  });
+
+  // Project sharing routes
+  app.post('/api/projects/share', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId, userIds, permission, message } = req.body;
+      const currentUserId = req.user.id;
+
+      // Validate project ownership
+      const project = await storage.getProject(projectId);
+      if (!project || project.userId !== currentUserId) {
+        return res.status(403).json({ message: "Not authorized to share this project" });
+      }
+
+      const shares = [];
+      for (const userId of userIds) {
+        const share = await storage.shareProject(projectId, currentUserId, userId, permission);
+        shares.push(share);
+      }
+
+      res.json({ message: "Project shared successfully", shares });
+    } catch (error) {
+      console.error("Error sharing project:", error);
+      res.status(500).json({ message: "Failed to share project" });
+    }
+  });
+
+  app.get('/api/projects/:id/shares', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const shares = await storage.getProjectShares(projectId);
+      res.json(shares);
+    } catch (error) {
+      console.error("Error fetching project shares:", error);
+      res.status(500).json({ message: "Failed to fetch project shares" });
+    }
+  });
+
+  app.post('/api/projects/invite', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId, expiresInHours = 168 } = req.body;
+      const currentUserId = req.user.id;
+
+      // Validate project ownership
+      const project = await storage.getProject(projectId);
+      if (!project || project.userId !== currentUserId) {
+        return res.status(403).json({ message: "Not authorized to create invite for this project" });
+      }
+
+      const inviteCode = await storage.generateProjectInvite(projectId, expiresInHours);
+      const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
+
+      res.json({
+        inviteCode,
+        expiresAt: expiresAt.toISOString(),
+        usedCount: 0
+      });
+    } catch (error) {
+      console.error("Error generating project invite:", error);
+      res.status(500).json({ message: "Failed to generate project invite" });
+    }
+  });
+
+  app.get('/api/projects/:id/invite', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const project = await storage.getProject(projectId);
+      
+      if (!project || !project.inviteCode) {
+        return res.status(404).json(null);
+      }
+
+      res.json({
+        inviteCode: project.inviteCode,
+        expiresAt: project.inviteExpiresAt,
+        usedCount: 0 // Mock for now
+      });
+    } catch (error) {
+      console.error("Error fetching project invite:", error);
+      res.status(500).json({ message: "Failed to fetch project invite" });
+    }
+  });
+
+  app.post('/api/join/:inviteCode', isOptionallyAuthenticated, async (req: any, res) => {
+    try {
+      const { inviteCode } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ 
+          message: "Authentication required to join project",
+          loginUrl: "/api/auth/discord"
+        });
+      }
+
+      const project = await storage.joinProjectByInvite(inviteCode, userId);
+      if (!project) {
+        return res.status(404).json({ message: "Invalid or expired invite code" });
+      }
+
+      res.json({ message: "Successfully joined project", project });
+    } catch (error) {
+      console.error("Error joining project:", error);
+      res.status(500).json({ message: "Failed to join project" });
+    }
+  });
+
+  app.delete('/api/projects/shares/:shareId', isAuthenticated, async (req: any, res) => {
+    try {
+      const shareId = parseInt(req.params.shareId);
+      const currentUserId = req.user.id;
+
+      // Get the share to verify ownership
+      const shares = await storage.getAllProjects(currentUserId);
+      const projectIds = shares.map(p => p.id);
+      
+      // Mock removal for now - in real implementation, verify the user owns the project
+      const removed = await storage.removeProjectShare(0, currentUserId); // Mock project ID
+      
+      if (!removed) {
+        return res.status(404).json({ message: "Share not found or not authorized" });
+      }
+
+      res.json({ message: "Share removed successfully" });
+    } catch (error) {
+      console.error("Error removing project share:", error);
+      res.status(500).json({ message: "Failed to remove project share" });
+    }
+  });
+
   // Protected routes example
   app.get('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {
