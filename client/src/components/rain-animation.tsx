@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 
 interface RainDrop {
@@ -20,58 +22,59 @@ export default function RainAnimation() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    // Initialize canvas
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Create rain drops
     const createDrops = () => {
       const drops: RainDrop[] = [];
-      const numDrops = Math.floor((canvas.width * canvas.height) / 8000); // Density based on screen size
-      
+      // density tuned to viewport area (adjust divisor to taste)
+      const numDrops = Math.floor((window.innerWidth * window.innerHeight) / 2000);
+
       for (let i = 0; i < numDrops; i++) {
         drops.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          speed: Math.random() * 3 + 2, // Speed between 2-5
-          length: Math.random() * 20 + 10, // Length between 10-30
-          opacity: Math.random() * 0.3 + 0.1 // Opacity between 0.1-0.4
+          x: Math.random() * window.innerWidth,
+          y: Math.random() * window.innerHeight,
+          speed: Math.random() * 10 + 6,          // 2–5 px/frame
+          length: Math.random() * 8 + 5,       // 10–30 px
+          opacity: Math.random() * 0.25 + 0.1     // 0.1–0.4
         });
       }
-      
       dropsRef.current = drops;
     };
 
-    createDrops();
+    const resizeCanvas = () => {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      // set CSS size
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      // set backing store size
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale all draws
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1;
+      createDrops();
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Update and draw each drop
-      dropsRef.current.forEach(drop => {
-        // Update position
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      // draw each drop
+      for (const drop of dropsRef.current) {
         drop.y += drop.speed;
-        
-        // Reset drop when it goes off screen
-        if (drop.y > canvas.height + drop.length) {
+
+        if (drop.y > window.innerHeight + drop.length) {
           drop.y = -drop.length;
-          drop.x = Math.random() * canvas.width;
+          drop.x = Math.random() * window.innerWidth;
         }
-        
-        // Draw the rain line
+
         ctx.beginPath();
         ctx.moveTo(drop.x, drop.y);
         ctx.lineTo(drop.x, drop.y + drop.length);
-        ctx.strokeStyle = `rgba(139, 195, 74, ${drop.opacity})`; // Green color with opacity
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = `rgba(115, 120, 255, ${drop.opacity})`; // blue
         ctx.stroke();
-      });
-      
+      }
+
       animationRef.current = requestAnimationFrame(animate);
     };
 
@@ -79,20 +82,15 @@ export default function RainAnimation() {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ 
-        background: 'transparent',
-        mixBlendMode: 'normal'
-      }}
+      className="fixed inset-0 pointer-events-none z-20"
+      style={{ background: 'transparent', mixBlendMode: 'normal' }}
     />
   );
 }

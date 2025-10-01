@@ -3,12 +3,31 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Zap, Shield, Palette, Package, Sparkles, Cpu, FileCheck, Download, FolderOpen, Eye, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { useEffect, useState } from 'react';
+import Splitting from 'splitting';
+import 'splitting/dist/splitting.css'; 
 import RainAnimation from "@/components/rain-animation";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
+import FertilizerBurst from "@/components/FertilizerBurst";
+'use client';
 
 export default function Home() {
-  
+  useEffect(() => {
+    let disposed = false;
+
+    (async () => {
+      // lazy import so it only runs in the browser
+      const { default: Splitting } = await import('splitting');
+      // run after paint so the <h1> is in the DOM
+      requestAnimationFrame(() => {
+        if (disposed) return;
+        Splitting({ target: '[data-splitting]', by: 'chars' });
+      });
+    })();
+
+    return () => { disposed = true; };
+  }, []);
+
   // Full feature set for desktop
   const desktopFeatures = [
     {
@@ -59,25 +78,37 @@ export default function Home() {
     { label: "Resolution Support", value: "16x-2048x", description: "All standard sizes" }
   ];
 
+  const [showMicro, setShowMicro] = useState(false);
+
   return (
     <div className="min-h-screen bg-background organic-bg relative no-horizontal-scroll">
+      <div className="bg-hero"></div>
       <RainAnimation />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
         <div className="container mx-auto px-6 py-24 relative max-w-full">
           <div className="text-center max-w-4xl mx-auto">
-            <div className="flex justify-center mb-6">
-              <img 
-                src={bonemeaLogo} 
-                alt="Bonemeal" 
-                className="w-24 h-24 floating"
-                style={{ imageRendering: 'pixelated' }}
-              />
-            </div>
-            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Bonemeal
+            <FertilizerBurst /> {/* initial big burst */}
+            {showMicro && <FertilizerBurst trigger />} {/* micro burst on CTA hover */}
+            <button className="cursor-default wobbly-text"
+              onMouseEnter={() => setShowMicro(true)}
+              onMouseLeave={() => setShowMicro(false)}
+            >
+            <h1
+              data-splitting
+              className="text-5xl font-bold mb-6 bg-clip-text text-transparent headline headline--float"
+            >
+              <span className="wobbly-text">B</span>
+              <span className="wobbly-text">o</span>
+              <span className="wobbly-text">n</span>
+              <span className="wobbly-text">e</span>
+              <span className="wobbly-text">m</span>
+              <span className="wobbly-text">e</span>
+              <span className="wobbly-text">a</span>
+              <span className="wobbly-text">l</span>
             </h1>
+            </button>
             <p className="text-xl text-muted-foreground mb-8">
               Grow your Minecraft texture productivity with automated LabPBR conversion
             </p>
@@ -207,7 +238,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 px-6">
+      <footer className="border-t py-8 px-6 no-vertical-scroll">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <img 

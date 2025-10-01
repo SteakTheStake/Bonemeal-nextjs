@@ -11,8 +11,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        /* base */
         background: "var(--background)",
         foreground: "var(--foreground)",
+
+        /* containers */
         card: {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
@@ -21,6 +24,8 @@ export default {
           DEFAULT: "var(--popover)",
           foreground: "var(--popover-foreground)",
         },
+
+        /* actions */
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
@@ -28,10 +33,6 @@ export default {
         secondary: {
           DEFAULT: "var(--secondary)",
           foreground: "var(--secondary-foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
         },
         accent: {
           DEFAULT: "var(--accent)",
@@ -41,9 +42,30 @@ export default {
           DEFAULT: "var(--destructive)",
           foreground: "var(--destructive-foreground)",
         },
+
+        /* ui tokens */
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+
+        /* extended chalky earth tones */
+        surface: "var(--surface)",
+        elevated: "var(--elevated)",
+        success: "var(--success)",
+        warning: "var(--warning)",
+        error: "var(--error)",
+        growth: "var(--growth)",
+        earth: "var(--earth)",
+        bloom: "var(--bloom)",
+        moss: "var(--moss)",
+        vine: "var(--vine)",
+        chalk: "var(--chalk)",
+
+        /* charts (backed by CSS vars; define in :root/.dark) */
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",
@@ -51,6 +73,8 @@ export default {
           "4": "var(--chart-4)",
           "5": "var(--chart-5)",
         },
+
+        /* sidebar (backed by CSS vars; define in :root/.dark) */
         sidebar: {
           DEFAULT: "var(--sidebar-background)",
           foreground: "var(--sidebar-foreground)",
@@ -64,20 +88,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {

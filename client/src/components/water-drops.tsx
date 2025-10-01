@@ -45,7 +45,7 @@ export function PhysicsWaterSystem() {
 
   // Physics constants - Realistic rain simulation
   const GRAVITY = new THREE.Vector3(0, -0.002, 0); // Realistic rain gravity
-  const WIND = new THREE.Vector3((Math.random() - 0.5) * 0.002, 0, 0); // Variable wind per frame
+  const WIND = new THREE.Vector3((Math.random() - 0.5) * 0.005, 0, 0); // Variable wind per frame
   const SURFACE_TENSION = 0.85;
   const PARTICLE_LIMIT = 15; // Minimal particles for performance
   const SPLASH_PARTICLES = 2; // Minimal splash particles

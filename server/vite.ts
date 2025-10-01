@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
@@ -20,6 +21,7 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -46,7 +48,7 @@ export async function setupVite(app: Express, server: Server) {
 
     try {
       const clientTemplate = path.resolve(
-        import.meta.dirname,
+        __dirname,
         "..",
         "client",
         "index.html",
@@ -68,7 +70,8 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const distPath = path.resolve(__dirname, "public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
@@ -76,10 +79,33 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  app.use(
+    express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        const ext = path.extname(filePath);
+
+        if (ext === ".html" || filePath.endsWith("sw.js")) {
+          res.setHeader("Cache-Control", "no-store, must-revalidate");
+          return;
+        }
+
+        if (
+          /(\.(?:js|css|png|jpe?g|gif|webp|avif|svg|ico|ttf|otf|woff2?))$/i.test(
+            filePath,
+          )
+        ) {
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+          return;
+        }
+
+        res.setHeader("Cache-Control", "public, max-age=3600");
+      },
+    }),
+  );
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
+    res.setHeader("Cache-Control", "no-store, must-revalidate");
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
