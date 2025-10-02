@@ -19,9 +19,8 @@ export default function JoinProject() {
 
   const joinProjectMutation = useMutation({
     mutationFn: async (inviteCode: string) => {
-      return apiRequest(`/api/projects/join/${inviteCode}`, {
-        method: 'POST'
-      });
+      const response = await apiRequest("POST", `/api/projects/join/${inviteCode}`);
+      return response.json();
     },
     onSuccess: (data) => {
       setProjectData(data.project);

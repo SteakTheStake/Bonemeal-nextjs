@@ -100,18 +100,15 @@ export default function AITextureGenerator() {
     
     try {
       // Call the AI generation API
-      const response = await apiRequest('/api/ai/generate-texture', {
-        method: 'POST',
-        body: JSON.stringify({
-          prompt,
-          negativePrompt,
-          style,
-          resolution: parseInt(resolution),
-          variations,
-          seed: seed || Math.floor(Math.random() * 1000000)
-        })
+      const response = await apiRequest("POST", "/api/ai/generate-texture", {
+        prompt,
+        negativePrompt,
+        style,
+        resolution: parseInt(resolution),
+        variations,
+        seed: seed || Math.floor(Math.random() * 1000000)
       });
-      
+
       const data = await response.json();
       setGeneratedImages(data.images || []);
       toast({ 

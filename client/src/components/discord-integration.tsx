@@ -70,12 +70,9 @@ export default function DiscordIntegration({ project, className }: DiscordIntegr
   // Share project mutation
   const shareProjectMutation = useMutation({
     mutationFn: async (data: { userIds: string[], permission: 'view' | 'edit', message?: string }) => {
-      return apiRequest('/api/projects/share', {
-        method: 'POST',
-        body: JSON.stringify({
-          projectId: project.id,
-          ...data
-        })
+      return apiRequest("POST", "/api/projects/share", {
+        projectId: project.id,
+        ...data
       });
     },
     onSuccess: () => {
@@ -99,12 +96,9 @@ export default function DiscordIntegration({ project, className }: DiscordIntegr
   // Generate invite mutation
   const generateInviteMutation = useMutation({
     mutationFn: async (data: { expiresInHours: number }) => {
-      return apiRequest('/api/projects/invite', {
-        method: 'POST',
-        body: JSON.stringify({
-          projectId: project.id,
-          ...data
-        })
+      return apiRequest("POST", "/api/projects/invite", {
+        projectId: project.id,
+        ...data
       });
     },
     onSuccess: () => {
@@ -119,9 +113,7 @@ export default function DiscordIntegration({ project, className }: DiscordIntegr
   // Remove share mutation
   const removeShareMutation = useMutation({
     mutationFn: async (shareId: number) => {
-      return apiRequest(`/api/projects/shares/${shareId}`, {
-        method: 'DELETE'
-      });
+      return apiRequest("DELETE", `/api/projects/shares/${shareId}`);
     },
     onSuccess: () => {
       toast({

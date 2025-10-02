@@ -58,13 +58,10 @@ export default function MobileDiscordShare({ project }: MobileDiscordShareProps)
   // Share project mutation
   const shareProjectMutation = useMutation({
     mutationFn: async (data: { userId: string, permission: 'view' | 'edit' }) => {
-      return apiRequest('/api/projects/share', {
-        method: 'POST',
-        body: JSON.stringify({
-          projectId: project.id,
-          userIds: [data.userId],
-          permission: data.permission
-        })
+      return apiRequest("POST", "/api/projects/share", {
+        projectId: project.id,
+        userIds: [data.userId],
+        permission: data.permission
       });
     },
     onSuccess: () => {
@@ -88,12 +85,9 @@ export default function MobileDiscordShare({ project }: MobileDiscordShareProps)
   // Generate invite mutation
   const generateInviteMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/projects/invite', {
-        method: 'POST',
-        body: JSON.stringify({
-          projectId: project.id,
-          expiresInHours: 168 // 1 week
-        })
+      return apiRequest("POST", "/api/projects/invite", {
+        projectId: project.id,
+        expiresInHours: 168 // 1 week
       });
     },
     onSuccess: () => {
