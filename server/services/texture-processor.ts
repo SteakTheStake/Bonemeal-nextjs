@@ -1,5 +1,6 @@
-import Sharp from 'sharp';
-import { ConversionSettings } from '@shared/schema';
+import Sharp from "sharp";
+import { ConversionSettings } from "@shared/schema";
+import { HuggingFaceClient, huggingFaceClient } from "./huggingface-client";
 
 export interface ProcessedTextures {
   baseColor: Buffer;
@@ -10,183 +11,123 @@ export interface ProcessedTextures {
 }
 
 export class TextureProcessor {
+  constructor(private readonly hfClient: HuggingFaceClient = huggingFaceClient) {}
+
   async processImage(imageBuffer: Buffer, settings: ConversionSettings): Promise<ProcessedTextures> {
     const image = Sharp(imageBuffer);
     const metadata = await image.metadata();
-    
+
     if (!metadata.width || !metadata.height) {
-      throw new Error('Invalid image dimensions');
+      throw new Error("Invalid image dimensions");
     }
+
+    const pngForInference = await image.clone().ensureAlpha().png().toBuffer();
 
     const results: ProcessedTextures = {
       baseColor: Buffer.alloc(0),
       normal: Buffer.alloc(0),
       specular: Buffer.alloc(0),
       height: Buffer.alloc(0),
-      ao: Buffer.alloc(0)
+      ao: Buffer.alloc(0),
     };
 
-    // Generate base color
     if (settings.generateBaseColor) {
-      results.baseColor = await this.generateBaseColor(image, settings);
+      results.baseColor = await this.generateBaseColor(image.clone(), settings);
     }
 
-    // Generate roughness map
-    if (settings.generateRoughness) {
-      const roughnessMap = await this.generateRoughnessMap(image, settings);
-      results.specular = await this.combineSpecularChannels(roughnessMap, null, null, null);
+    let depthBuffer: Buffer | null = null;
+    if (settings.generateHeight || settings.generateNormal) {
+      depthBuffer = await this.hfClient.generateDepthMap(pngForInference);
+
+      if (settings.generateHeight) {
+        results.height = depthBuffer;
+      }
     }
 
-    // Generate normal map
-    if (settings.generateNormal) {
-      results.normal = await this.generateNormalMap(image, settings);
+    if (settings.generateNormal && depthBuffer) {
+      results.normal = await this.generateNormalFromDepth(depthBuffer, settings.normalStrength ?? 1);
     }
 
-    // Generate height map
-    if (settings.generateHeight) {
-      results.height = await this.generateHeightMap(image, settings);
-    }
-
-    // Generate AO
     if (settings.generateAO) {
-      results.ao = await this.generateAOMap(image, settings);
+      results.ao = await this.generateAOMap(image.clone(), settings);
     }
 
     return results;
   }
 
   private async generateBaseColor(image: Sharp.Sharp, settings: ConversionSettings): Promise<Buffer> {
-    // Apply contrast adjustment
-    const contrast = settings.baseColorContrast;
-    return await image
+    const contrast = settings.baseColorContrast ?? 1;
+    return image
       .modulate({ brightness: 1, saturation: 1 })
       .linear(contrast, -(128 * contrast) + 128)
       .png()
       .toBuffer();
   }
 
-  private async generateRoughnessMap(image: Sharp.Sharp, settings: ConversionSettings): Promise<Buffer> {
-    // Convert to grayscale and apply roughness settings
-    let roughness = image.clone().grayscale();
-    
-    if (settings.roughnessInvert) {
-      roughness = roughness.negate();
+  private async generateNormalFromDepth(depthBuffer: Buffer, strength: number): Promise<Buffer> {
+    const depthImage = Sharp(depthBuffer);
+    const metadata = await depthImage.metadata();
+
+    if (!metadata.width || !metadata.height) {
+      throw new Error("Depth map returned without dimensions");
     }
 
-    // Apply intensity
-    const intensity = settings.roughnessIntensity;
-    
-    return await roughness
-      .linear(intensity, 0)
-      .png()
+    const grayscaleDepth = await depthImage
+      .clone()
+      .ensureAlpha()
+      .removeAlpha()
+      .greyscale()
+      .raw()
       .toBuffer();
-  }
 
-  private async generateNormalMap(image: Sharp.Sharp, settings: ConversionSettings): Promise<Buffer> {
-    // Generate normal map using edge detection
-    const grayscale = await image.clone().grayscale().raw().toBuffer();
-    const { width, height } = await image.metadata();
-    
-    if (!width || !height) {
-      throw new Error('Invalid image dimensions for normal map generation');
-    }
-
+    const width = metadata.width;
+    const height = metadata.height;
     const normalBuffer = Buffer.alloc(width * height * 3);
-    const strength = settings.normalStrength;
+
+    const intensity = Math.max(0.1, strength || 1);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
-        const rgbIdx = idx * 3;
+        const rgbIdx = (y * width + x) * 3;
 
-        // Sample neighboring pixels
-        const tl = this.getPixelSafe(grayscale, x - 1, y - 1, width, height);
-        const tm = this.getPixelSafe(grayscale, x, y - 1, width, height);
-        const tr = this.getPixelSafe(grayscale, x + 1, y - 1, width, height);
-        const ml = this.getPixelSafe(grayscale, x - 1, y, width, height);
-        const mr = this.getPixelSafe(grayscale, x + 1, y, width, height);
-        const bl = this.getPixelSafe(grayscale, x - 1, y + 1, width, height);
-        const bm = this.getPixelSafe(grayscale, x, y + 1, width, height);
-        const br = this.getPixelSafe(grayscale, x + 1, y + 1, width, height);
+        const left = this.getPixel(grayscaleDepth, x - 1, y, width, height);
+        const right = this.getPixel(grayscaleDepth, x + 1, y, width, height);
+        const top = this.getPixel(grayscaleDepth, x, y - 1, width, height);
+        const bottom = this.getPixel(grayscaleDepth, x, y + 1, width, height);
 
-        // Calculate gradients
-        const dx = (tr + 2 * mr + br) - (tl + 2 * ml + bl);
-        const dy = (bl + 2 * bm + br) - (tl + 2 * tm + tr);
+        const dx = ((right - left) / 255) * intensity;
+        const dy = ((bottom - top) / 255) * intensity;
 
-        // Convert to normal
-        const nx = dx * strength / 255;
-        const ny = -dy * strength / 255; // DirectX format (Y-)
+        const nx = -dx;
+        const ny = -dy;
         const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
 
-        // Store as RGB (DirectX format)
-        normalBuffer[rgbIdx] = Math.round((nx + 1) * 127.5);     // R
-        normalBuffer[rgbIdx + 1] = Math.round((ny + 1) * 127.5); // G
-        normalBuffer[rgbIdx + 2] = Math.round(nz * 255);         // B
+        normalBuffer[rgbIdx] = Math.round((nx + 1) * 127.5);
+        normalBuffer[rgbIdx + 1] = Math.round((ny + 1) * 127.5);
+        normalBuffer[rgbIdx + 2] = Math.round(nz * 255);
       }
     }
 
-    return await Sharp(normalBuffer, { raw: { width, height, channels: 3 } })
-      .png()
-      .toBuffer();
-  }
-
-  private async generateHeightMap(image: Sharp.Sharp, settings: ConversionSettings): Promise<Buffer> {
-    // Convert to grayscale and apply depth scaling
-    const depth = settings.heightDepth;
-    
-    return await image
-      .clone()
-      .grayscale()
-      .linear(depth, 0)
+    return Sharp(normalBuffer, { raw: { width, height, channels: 3 } })
       .png()
       .toBuffer();
   }
 
   private async generateAOMap(image: Sharp.Sharp, settings: ConversionSettings): Promise<Buffer> {
-    // Generate ambient occlusion using blur and darken
-    const radius = Math.max(1, Math.round(settings.aoRadius * 10));
-    
-    return await image
+    const radius = Math.max(1, Math.round((settings.aoRadius ?? 0.5) * 10));
+
+    return image
       .clone()
-      .grayscale()
+      .greyscale()
       .blur(radius)
       .modulate({ brightness: 0.7 })
       .png()
       .toBuffer();
   }
 
-  private async combineSpecularChannels(
-    roughness: Buffer | null,
-    f0: Buffer | null,
-    porosity: Buffer | null,
-    emission: Buffer | null
-  ): Promise<Buffer> {
-    // Combine channels into LabPBR specular format
-    // R: Roughness, G: F0, B: Porosity/SSS, A: Emission
-    
-    if (!roughness) {
-      throw new Error('Roughness map is required for specular texture');
-    }
-
-    const roughnessImage = Sharp(roughness);
-    const { width, height } = await roughnessImage.metadata();
-
-    if (!width || !height) {
-      throw new Error('Invalid specular texture dimensions');
-    }
-
-    // For now, just use the roughness map as red channel
-    // In a full implementation, you'd combine all channels properly
-    return await roughnessImage
-      .ensureAlpha()
-      .png()
-      .toBuffer();
-  }
-
-  private getPixelSafe(buffer: Buffer, x: number, y: number, width: number, height: number): number {
-    if (x < 0 || x >= width || y < 0 || y >= height) {
-      return 0;
-    }
-    return buffer[y * width + x];
+  private getPixel(buffer: Buffer, x: number, y: number, width: number, height: number): number {
+    const clampedX = Math.min(Math.max(x, 0), width - 1);
+    const clampedY = Math.min(Math.max(y, 0), height - 1);
+    return buffer[clampedY * width + clampedX];
   }
 }

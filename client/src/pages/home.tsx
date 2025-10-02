@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from 'react';
 import Splitting from 'splitting';
-import 'splitting/dist/splitting.css'; 
+import 'splitting/dist/splitting.css';
 import RainAnimation from "@/components/rain-animation";
 import bonemeaLogo from "@assets/SkyBlock_items_enchanted_bonemeal_1752287919002.gif";
 import FertilizerBurst from "@/components/FertilizerBurst";

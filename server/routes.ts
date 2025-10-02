@@ -3,11 +3,14 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import multer from "multer";
 import { nanoid } from 'nanoid';
+import path from "node:path";
 import { storage } from "./storage";
 import { TextureProcessor } from "./services/texture-processor";
+import type { ProcessedTextures } from "./services/texture-processor";
+import { huggingFaceClient } from "./services/huggingface-client";
 import { LabPBRConverter } from "./services/labpbr-converter";
 import { ZipHandler } from "./services/zip-handler";
-import { insertConversionJobSchema, type ConversionSettings, type ProcessingStatus } from "@shared/schema";
+import { insertConversionJobSchema, type ConversionSettings, type ProcessingStatus, type ProcessingLog } from "@shared/schema";
 import { setupDiscordAuth, isAuthenticated, isOptionallyAuthenticated } from "./discordAuth";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -21,145 +24,183 @@ async function processFileAsync(jobId: number, fileBuffer: Buffer, settings: Con
     if (!currentStatus) return;
 
     const mergedLogs = updates.logs
+<<<<<<< Updated upstream
       ? [...(currentStatus.logs ?? []), ...updates.logs]
+=======
+      ? [...currentStatus.logs, ...updates.logs]
+>>>>>>> Stashed changes
       : currentStatus.logs;
 
     await storage.updateProcessingStatus(jobId, {
       ...currentStatus,
       ...updates,
       logs: mergedLogs,
+<<<<<<< Updated upstream
       elapsedTime: (currentStatus.elapsedTime ?? 0) + 1000
     });
+=======
+      elapsedTime: currentStatus.elapsedTime + 1000,
+    });
+  };
+
+  const appendLog = async (message: string, level: ProcessingLog['level'] = 'info') => {
+    await updateStatus({
+      logs: [
+        {
+          timestamp: new Date().toISOString(),
+          level,
+          message,
+        },
+      ],
+    });
+  };
+
+  const persistGeneratedTextures = async (sourcePath: string, processed: ProcessedTextures) => {
+    const parsed = path.parse(sourcePath);
+    const directory = parsed.dir.replace(/\\/g, '/');
+    const baseName = parsed.name;
+
+    const entries = [
+      { buffer: processed.baseColor, type: 'base', suffix: '_albedo.png' },
+      { buffer: processed.normal, type: 'normal', suffix: '_normal.png' },
+      { buffer: processed.height, type: 'height', suffix: '_depth.png' },
+      { buffer: processed.ao, type: 'ao', suffix: '_ao.png' },
+    ];
+
+    let created = 0;
+
+    for (const entry of entries) {
+      if (!entry.buffer || entry.buffer.length === 0) continue;
+
+      const relativePath = directory
+        ? `${directory}/${baseName}${entry.suffix}`
+        : `${baseName}${entry.suffix}`;
+
+      const textureFile = await storage.createTextureFile({
+        jobId,
+        originalPath: relativePath,
+        textureType: entry.type,
+        validationStatus: 'valid',
+      });
+
+      await storage.updateTextureFile(textureFile.id, {
+        convertedPath: `data:image/png;base64,${entry.buffer.toString('base64')}`,
+      });
+
+      created += 1;
+    }
+
+    return created;
+>>>>>>> Stashed changes
   };
 
   try {
     const job = await storage.getConversionJob(jobId);
     if (!job) throw new Error(`Job ${jobId} not found`);
 
-    // Check if it's a resource pack or single file
     const isZipFile = job.filename.toLowerCase().endsWith('.zip');
-    
+
     if (isZipFile) {
+      await appendLog('Extracting resource pack...');
       await updateStatus({
         currentTask: 'Extracting resource pack...',
         currentStep: 1,
-        logs: [{ timestamp: new Date().toISOString(), level: 'info', message: 'Extracting resource pack...' }]
       });
 
       const extractedFiles = await zipHandler.extractResourcePack(fileBuffer);
-      
+
+      await appendLog(`Found ${extractedFiles.length} texture files`, 'success');
       await updateStatus({
         currentTask: 'Processing textures...',
         currentStep: 2,
         totalImages: extractedFiles.length,
-        logs: [{ timestamp: new Date().toISOString(), level: 'success', message: `Found ${extractedFiles.length} texture files` }]
       });
 
-      // Process each texture file
-      for (let i = 0; i < extractedFiles.length; i++) {
-        const file = extractedFiles[i];
-        
+      for (let index = 0; index < extractedFiles.length; index++) {
+        const file = extractedFiles[index];
+
+        await appendLog(`Processing ${file.name}...`);
         await updateStatus({
           currentTask: `Processing ${file.name}...`,
-          imagesProcessed: i,
-          logs: [{ timestamp: new Date().toISOString(), level: 'info', message: `Processing ${file.name}...` }]
+          imagesProcessed: index,
         });
 
-        // Create texture file record
-        const textureFile = await storage.createTextureFile({
-          jobId,
-          originalPath: file.path,
-          textureType: 'base',
-          validationStatus: 'valid',
-        });
+        const processed = await textureProcessor.processImage(file.buffer, settings);
+        const generatedCount = await persistGeneratedTextures(file.path, processed);
 
-        // Process texture
-        const processedTextures = await textureProcessor.processImage(file.buffer, settings);
-        
-        // Validate against LabPBR
-        const validation = await labpbrConverter.validateTexture(processedTextures.specular);
-        
-        await storage.updateTextureFile(textureFile.id, {
-          validationStatus: validation.issues.some(i => i.level === 'error') ? 'error' : 
-                           validation.issues.some(i => i.level === 'warning') ? 'warning' : 'valid',
-          validationIssues: validation.issues,
-        });
+        const currentStatus = await storage.getProcessingStatus(jobId);
+        const previousTextures = currentStatus?.texturesGenerated ?? 0;
 
+        await appendLog(`Generated ${generatedCount} maps via Hugging Face`, 'success');
         await updateStatus({
-          texturesGenerated: (i + 1) * 4, // 4 textures per input
+          imagesProcessed: index + 1,
+          texturesGenerated: previousTextures + generatedCount,
         });
       }
 
+      await appendLog('Creating output package...');
       await updateStatus({
         currentTask: 'Creating output package...',
         currentStep: 4,
         progress: 90,
-        logs: [{ timestamp: new Date().toISOString(), level: 'info', message: 'Creating output package...' }]
       });
 
-      // Create output zip
       await zipHandler.createConvertedResourcePack(jobId);
-
     } else {
-      // Process single image
+      await appendLog('Processing single image...');
       await updateStatus({
         currentTask: 'Processing single image...',
         currentStep: 1,
         totalImages: 1,
-        logs: [{ timestamp: new Date().toISOString(), level: 'info', message: 'Processing single image...' }]
       });
 
-      const processedTextures = await textureProcessor.processImage(fileBuffer, settings);
-      
+      const processed = await textureProcessor.processImage(fileBuffer, settings);
+      const generatedCount = await persistGeneratedTextures(job.filename, processed);
+
+      const currentStatus = await storage.getProcessingStatus(jobId);
+      const previousTextures = currentStatus?.texturesGenerated ?? 0;
+
+      await appendLog(`Generated ${generatedCount} maps via Hugging Face`, 'success');
       await updateStatus({
-        currentTask: 'Validating textures...',
+        currentTask: 'Textures ready',
         currentStep: 3,
-        texturesGenerated: 4,
-        logs: [{ timestamp: new Date().toISOString(), level: 'success', message: 'Generated 4 texture maps' }]
-      });
-
-      // Validate
-      const validation = await labpbrConverter.validateTexture(processedTextures.specular);
-      
-      await storage.createTextureFile({
-        jobId,
-        originalPath: job.filename,
-        textureType: 'base',
-        validationStatus: validation.issues.some(i => i.level === 'error') ? 'error' : 
-                         validation.issues.some(i => i.level === 'warning') ? 'warning' : 'valid',
+        texturesGenerated: previousTextures + generatedCount,
+        imagesProcessed: 1,
       });
     }
 
+    await appendLog('Processing completed successfully', 'success');
     await updateStatus({
       currentTask: 'Complete!',
       currentStep: 5,
       progress: 100,
-      logs: [{ timestamp: new Date().toISOString(), level: 'success', message: 'Processing completed successfully' }]
     });
 
-    await storage.updateConversionJob(jobId, { 
-      status: 'completed', 
+    await storage.updateConversionJob(jobId, {
+      status: 'completed',
       progress: 100,
-      completedAt: new Date()
+      completedAt: new Date(),
     });
-
   } catch (error) {
     console.error('Processing error:', error);
-    
-    await storage.updateConversionJob(jobId, { 
+
+    await storage.updateConversionJob(jobId, {
       status: 'failed',
-      errors: [{ message: error instanceof Error ? error.message : 'Unknown error' }]
+      errors: [{ message: error instanceof Error ? error.message : 'Unknown error' }],
     });
 
     const currentStatus = await storage.getProcessingStatus(jobId);
     if (currentStatus) {
       await storage.updateProcessingStatus(jobId, {
         ...currentStatus,
-        logs: [...currentStatus.logs, { 
-          timestamp: new Date().toISOString(), 
-          level: 'error', 
-          message: `Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
-        }]
+        logs: [
+          ...currentStatus.logs,
+          {
+            timestamp: new Date().toISOString(),
+            level: 'error',
+            message: `Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          },
+        ],
       });
     }
   }
@@ -775,6 +816,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Upload error:', error);
       res.status(500).json({ message: "Failed to process upload" });
+    }
+  });
+
+  app.post("/api/ai/generate-texture", async (req, res) => {
+    try {
+      if (!huggingFaceClient.isConfigured()) {
+        return res.status(503).json({ message: "Hugging Face API key is not configured" });
+      }
+
+      const body = z
+        .object({
+          prompt: z.string().min(3, { message: "Please provide a prompt." }),
+          negativePrompt: z.string().optional(),
+        })
+        .parse(req.body ?? {});
+
+      const imageBuffer = await huggingFaceClient.generateTexture(body.prompt, body.negativePrompt);
+      const dataUrl = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+
+      res.json({ images: [dataUrl] });
+    } catch (error) {
+      console.error('AI texture generation failed:', error);
+      res.status(500).json({
+        message: error instanceof Error ? error.message : 'Failed to generate texture',
+      });
     }
   });
 

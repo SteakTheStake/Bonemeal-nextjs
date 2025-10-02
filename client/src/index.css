@@ -383,8 +383,10 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
+    0% { transform: translateY(0px); }
     50% { transform: translateY(-3px); }
+    75% { transform: rotateX(-2deg); }
+    100% { transform: translateY(0px); }
   }
 
   @keyframes branch-sway {

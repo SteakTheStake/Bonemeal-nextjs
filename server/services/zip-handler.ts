@@ -60,21 +60,15 @@ export class ZipHandler {
 
     // Add converted texture files
     for (const textureFile of textureFiles) {
-      if (textureFile.convertedPath) {
-        // In a real implementation, you'd load the converted texture files
-        // For now, we'll create placeholder files
-        const baseName = path.basename(textureFile.originalPath, path.extname(textureFile.originalPath));
-        const dir = path.dirname(textureFile.originalPath);
+      if (!textureFile.convertedPath) continue;
 
-        // Add base texture
-        zip.file(textureFile.originalPath, Buffer.from('placeholder'));
-        
-        // Add normal map
-        zip.file(path.join(dir, `${baseName}_n.png`), Buffer.from('placeholder'));
-        
-        // Add specular map
-        zip.file(path.join(dir, `${baseName}_s.png`), Buffer.from('placeholder'));
+      const [header, data] = textureFile.convertedPath.split(',');
+      if (!header?.startsWith('data:image') || !data) {
+        continue;
       }
+
+      const buffer = Buffer.from(data, 'base64');
+      zip.file(textureFile.originalPath, buffer);
     }
 
     return await zip.generateAsync({ type: 'nodebuffer' });
