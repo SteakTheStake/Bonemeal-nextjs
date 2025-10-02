@@ -27,10 +27,10 @@ export default function ProjectShareDialog({ projectId, projectName }: ProjectSh
 
   const generateInviteMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest(`/api/projects/${projectId}/invite`, {
-        method: 'POST',
-        body: { expiresInHours: parseInt(expiresInHours) }
+      const response = await apiRequest("POST", `/api/projects/${projectId}/invite`, {
+        expiresInHours: parseInt(expiresInHours)
       });
+      return response.json();
     },
     onSuccess: (data) => {
       setInviteData(data);

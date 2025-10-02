@@ -65,7 +65,7 @@ export default function PresetsManager({
       settings: any;
       isDefault: boolean;
     }) => {
-      await apiRequest("/api/presets", "POST", data);
+      await apiRequest("POST", "/api/presets", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/presets"] });
@@ -90,7 +90,7 @@ export default function PresetsManager({
   // Delete preset mutation
   const deletePresetMutation = useMutation({
     mutationFn: async (presetId: number) => {
-      await apiRequest(`/api/presets/${presetId}`, "DELETE");
+      await apiRequest("DELETE", `/api/presets/${presetId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/presets"] });
@@ -111,7 +111,7 @@ export default function PresetsManager({
   // Set default preset mutation
   const setDefaultMutation = useMutation({
     mutationFn: async (presetId: number) => {
-      await apiRequest(`/api/presets/${presetId}/default`, "POST");
+      await apiRequest("POST", `/api/presets/${presetId}/default`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/presets"] });

@@ -255,23 +255,9 @@ export function AdvancedInterpolation({ onSettingsChange }: AdvancedInterpolatio
             </div>
 
             {/* Connection Test */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // TODO: Implement connection test
-                  console.log("Testing AI server connection...");
-                }}
-                disabled={!aiServerIP || !aiServerPort}
-              >
-                Test Connection
-              </Button>
-              {aiServerIP && aiServerPort && (
-                <Badge variant="secondary" className="text-xs">
-                  {aiServerIP}:{aiServerPort}
-                </Badge>
-              )}
+            <div className="text-xs text-muted-foreground">
+              Connection testing will be available once the external AI bridge is ready.
+              For now, ensure your Stable Diffusion endpoint is reachable manually before enabling AI upscaling.
             </div>
           </CardContent>
         )}

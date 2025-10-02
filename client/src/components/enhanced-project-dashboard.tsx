@@ -180,7 +180,8 @@ export default function EnhancedProjectDashboard({ projectId }: { projectId?: nu
 
     const createProjectMutation = useMutation({
       mutationFn: async (data: { name: string; description: string }) => {
-        return apiRequest('/api/projects', { method: 'POST', body: data });
+        const response = await apiRequest("POST", "/api/projects", data);
+        return response.json() as Promise<Project>;
       },
       onSuccess: (newProject: Project) => {
         toast({ title: "Project created successfully" });

@@ -65,84 +65,10 @@ export default function BatchProcessor() {
   });
 
   const startProcessing = async () => {
-    setIsProcessing(true);
-    setIsPaused(false);
-    
-    try {
-      // Create a new conversion job for the batch
-      const response = await apiRequest('/api/jobs', {
-        method: 'POST',
-        body: {
-          settings: {
-            outputFormat: 'png',
-            generateMaps: true,
-            compressionLevel: 6,
-            bulkResize: { enabled: false }
-          }
-        }
-      });
-
-      const jobId = response.id;
-
-      for (let i = currentIndex; i < queue.length; i++) {
-        if (isPaused) break;
-        
-        setCurrentIndex(i);
-        const item = queue[i];
-        
-        // Update status to processing
-        setQueue(prev => prev.map((q, idx) => 
-          idx === i ? { ...q, status: 'processing', startTime: Date.now() } : q
-        ));
-        
-        try {
-          // Upload file to the job
-          const formData = new FormData();
-          // Note: We'd need to store the actual File objects in the queue
-          // This is a simplified version - in practice, we'd need to restructure
-          // the queue to store the actual files
-          
-          // For now, simulate real processing time
-          await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-          
-          // Mark as completed
-          setQueue(prev => prev.map((q, idx) => 
-            idx === i ? { 
-              ...q, 
-              status: 'completed', 
-              progress: 100,
-              endTime: Date.now()
-            } : q
-          ));
-          
-        } catch (error) {
-          console.error(`Failed to process ${item.name}:`, error);
-          setQueue(prev => prev.map((q, idx) => 
-            idx === i ? { 
-              ...q, 
-              status: 'failed', 
-              progress: 100,
-              endTime: Date.now(),
-              error: error instanceof Error ? error.message : 'Processing failed'
-            } : q
-          ));
-        }
-      }
-      
-      if (!isPaused) {
-        setIsProcessing(false);
-        setCurrentIndex(0);
-        toast({ title: "Batch processing complete!" });
-      }
-    } catch (error) {
-      console.error('Failed to start batch processing:', error);
-      setIsProcessing(false);
-      toast({ 
-        title: "Failed to start batch processing", 
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive" 
-      });
-    }
+    toast({
+      title: "Batch processing coming soon",
+      description: "Batch uploads aren't wired up yet. Please convert files individually for now.",
+    });
   };
 
   const pauseProcessing = () => {
@@ -207,6 +133,11 @@ export default function BatchProcessor() {
             Supports PNG, JPG, TIFF, TGA, and ZIP files
           </p>
         </div>
+
+        <p className="text-sm text-muted-foreground">
+          Batch automation is still being wired up. The controls below remain available for preview, but
+          conversions will need to be run individually for now.
+        </p>
 
         {/* Controls */}
         {queue.length > 0 && (
