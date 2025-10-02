@@ -18,13 +18,18 @@ const zipHandler = new ZipHandler();
 async function processFileAsync(jobId: number, fileBuffer: Buffer, settings: ConversionSettings) {
   const updateStatus = async (updates: Partial<ProcessingStatus>) => {
     const currentStatus = await storage.getProcessingStatus(jobId);
-    if (currentStatus) {
-      await storage.updateProcessingStatus(jobId, {
-        ...currentStatus,
-        ...updates,
-        elapsedTime: currentStatus.elapsedTime + 1000
-      });
-    }
+    if (!currentStatus) return;
+
+    const mergedLogs = updates.logs
+      ? [...(currentStatus.logs ?? []), ...updates.logs]
+      : currentStatus.logs;
+
+    await storage.updateProcessingStatus(jobId, {
+      ...currentStatus,
+      ...updates,
+      logs: mergedLogs,
+      elapsedTime: (currentStatus.elapsedTime ?? 0) + 1000
+    });
   };
 
   try {
